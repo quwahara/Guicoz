@@ -4,21 +4,66 @@
     <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <style>
-    #draggable { width: 150px; height: 150px; padding: 0.5em; }
+    .std { width: 150px; height: 150px; padding: 0.5em; }
+    /*
+    .draggable { width: 150px; height: 150px; padding: 0.5em; }
+    */
+    .page { background-image: url('grid120.png') }
     </style>
     <script>
+    var $page, manager, ctx, obj
     $(function() {
-        $( "#draggable" ).draggable();
+        ctx = {}
+        $page = $(".page")
+        ctx.$page = $(".page")
+        ctx.manager = {}
+        ctx.nextCreationPosition = { left: 100, top: 100 }
+        var m = ctx.manager
+        m.createPanel = function () {
+          obj = $("<div class='ui-widget-content std draggable resizable'>aaa</div>")
+          .appendTo(ctx.$page)
+          .draggable({
+            create: function( event, ui ) {
+              console.log(event);
+              // $(event.target).position(ctx.nextCreationPosition)
+              $(event.target).css(ctx.nextCreationPosition)
+              console.log("sssssss");
+            }
+          })
+          console.log("bbbdd");
+        }
+
+
+        $( ".draggable" ).draggable();
+        $( ".resizable" ).resizable();
         $( "#text" ).draggable();
+
+        $("#pannelButton").click(function (e) {
+          m.createPanel()
+        })
+        $("#headerButton").click(function (e) {
+          obj.position({left: 200, top: 100})
+          console.log("xxx");
+        })
     });
     </script>
 </head>
-<body style="background-image: url('grid120.png')">
-<div id="draggable" class="ui-widget-content">
-    <p>Drag me around</p>
-</div>
-<div id="text" style="padding: 8">
-<input type="text" size="20" />
-</div>
+<body style="">
+  <div class="page">
+    <div class="ui-widget-content std draggable resizable">
+        <button>Input Text</button>
+        <button id="pannelButton">Pannel</button>
+        <button id="headerButton">Header</button>
+        <button>Footer</button>
+        <button>Left Sidebar</button>
+        <button>Right Sidebar</button>
+    </div>
+    <div class="ui-widget-content std draggable resizable">
+        <p>Drag me around</p>
+    </div>
+    <div id="text" style="padding: 8">
+    <input type="text" size="20" />
+    </div>
+  </div>
 </body>
 </html>
