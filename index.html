@@ -11,20 +11,59 @@
     .page { background-image: url('grid120.png') }
     </style>
     <script>
-    var manager, ctx, obj
+    var ctx, obj
     $(function() {
         ctx = {}
+        ctx.preset = {
+          nextCreationPosition: {
+            left: 120,
+            top: 120
+          },
+          creationPositionIncrements: {
+            left: 10,
+            top: 10
+          },
+          controls: {
+            panel: {
+              width: 120,
+              height: 120
+            }
+          }
+        }
+        ctx.default = $.extend(true, {}, ctx.preset)
+        ctx.utils = {}
+        ctx.utils.creationPosition = function () {
+          var p = $.extend({}, this)
+          this.left += ctx.default.creationPositionIncrements.left
+          this.top += ctx.default.creationPositionIncrements.top
+          return p;
+        }
+        ctx.utils.uiposition = function () {
+          return "left+" + this.left + " top+" + this.top;
+        }
+
         ctx.$page = $(".page")
         ctx.manager = {}
-        ctx.nextCreationPosition = { left: 100, top: 100 }
+        ctx.nextCreationPosition = $.extend({}, ctx.default.nextCreationPosition)
+        ctx.controls = {}
         var m = ctx.manager
         console.log(ctx.$page.position());
         m.createPanel = function () {
-          obj = $("<div class='ui-widget-content std draggable resizable'>aaa</div>")
+          var control = $.extend(true, {}, ctx.default.controls["panel"])
+          control.position = ctx.utils.creationPosition.apply(ctx.nextCreationPosition)
+          console.log(control);
+
+          var elm = $("<div class='ui-widget-content std draggable resizable'>aaa</div>")
           .appendTo(ctx.$page)
           .draggable()
-          .position({ my: "left top", at: "left+200, top+0", of: ctx.$page})
-          console.log("yyyy");
+          .position({ my: "left top", at: ctx.utils.uiposition.apply(control.position), of: ctx.$page})
+          .uniqueId()
+          .height(control.height).width(control.width)
+
+          control.elm = elm
+          ctx.controls[elm.attr("id")] = control
+
+          console.log(ctx.controls);
         }
 
         $( ".draggable" ).draggable();
