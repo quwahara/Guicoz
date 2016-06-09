@@ -11,28 +11,21 @@
     .page { background-image: url('grid120.png') }
     </style>
     <script>
-    var $page, manager, ctx, obj
+    var manager, ctx, obj
     $(function() {
         ctx = {}
-        $page = $(".page")
         ctx.$page = $(".page")
         ctx.manager = {}
         ctx.nextCreationPosition = { left: 100, top: 100 }
         var m = ctx.manager
+        console.log(ctx.$page.position());
         m.createPanel = function () {
           obj = $("<div class='ui-widget-content std draggable resizable'>aaa</div>")
           .appendTo(ctx.$page)
-          .draggable({
-            create: function( event, ui ) {
-              console.log(event);
-              // $(event.target).position(ctx.nextCreationPosition)
-              $(event.target).css(ctx.nextCreationPosition)
-              console.log("sssssss");
-            }
-          })
-          console.log("bbbdd");
+          .draggable()
+          .position({ my: "left top", at: "left+200, top+0", of: ctx.$page})
+          console.log("yyyy");
         }
-
 
         $( ".draggable" ).draggable();
         $( ".resizable" ).resizable();
@@ -40,10 +33,6 @@
 
         $("#pannelButton").click(function (e) {
           m.createPanel()
-        })
-        $("#headerButton").click(function (e) {
-          obj.position({left: 200, top: 100})
-          console.log("xxx");
         })
     });
     </script>
