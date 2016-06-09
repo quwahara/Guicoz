@@ -11,8 +11,9 @@
     var GK
     $(function() {
         GK = (function () {
-          var gk = function () {
-
+          var gk = function (cmd) {
+            var self = this
+            gk.cmds[cmd[0]].apply(self, cmd)
           }
           gk.preset = {
             nextCreationPosition: {
@@ -50,7 +51,7 @@
           gk.cmds.createPanel = function () {
             var control = $.extend(true, {}, ctx.default.controls["panel"])
             control.position = gk.utils.creationPosition.apply(ctx.nextCreationPosition)
-            var elm = $("<div class='ui-widget-content draggable resizable'>bbb</div>")
+            var elm = $("<div class='ui-widget-content draggable resizable'>sss</div>")
             .appendTo(ctx.$page)
             .draggable()
             .position({ my: "left top", at: GK.utils.uiposition.apply(control.position), of: ctx.$page})
@@ -70,7 +71,7 @@
         $( "#text" ).draggable();
 
         $("#pannelButton").click(function (e) {
-          GK.cmds.createPanel()
+          GK(["createPanel"])
         })
     });
     </script>
