@@ -32,6 +32,8 @@
           }
           gk.ctx = {}
           var ctx = gk.ctx
+          ctx.controls = {}
+          ctx.$page = $(".page")
           gk.utils = {}
           gk.utils.creationPosition = function () {
             var p = $.extend({}, this)
@@ -44,41 +46,31 @@
             // this: { left: (int), top: (int) }
             return "left+" + this.left + " top+" + this.top;
           }
-
+          gk.cmds = {}
+          gk.cmds.createPanel = function () {
+            var control = $.extend(true, {}, ctx.default.controls["panel"])
+            control.position = gk.utils.creationPosition.apply(ctx.nextCreationPosition)
+            var elm = $("<div class='ui-widget-content draggable resizable'>bbb</div>")
+            .appendTo(ctx.$page)
+            .draggable()
+            .position({ my: "left top", at: GK.utils.uiposition.apply(control.position), of: ctx.$page})
+            .uniqueId()
+            .height(control.height).width(control.width)
+            control.elm = elm
+            ctx.controls[elm.attr("id")] = control
+          }
           return gk;
         })()
         var ctx = GK.ctx
         ctx.default = $.extend(true, {}, GK.preset)
-        ctx.$page = $(".page")
-        ctx.manager = {}
         ctx.nextCreationPosition = $.extend({}, ctx.default.nextCreationPosition)
-        ctx.controls = {}
-        var m = ctx.manager
-        console.log(ctx.$page.position());
-        m.createPanel = function () {
-          var control = $.extend(true, {}, ctx.default.controls["panel"])
-          control.position = GK.utils.creationPosition.apply(ctx.nextCreationPosition)
-          console.log(control);
-
-          var elm = $("<div class='ui-widget-content draggable resizable'>aaa</div>")
-          .appendTo(ctx.$page)
-          .draggable()
-          .position({ my: "left top", at: GK.utils.uiposition.apply(control.position), of: ctx.$page})
-          .uniqueId()
-          .height(control.height).width(control.width)
-
-          control.elm = elm
-          ctx.controls[elm.attr("id")] = control
-
-          console.log(ctx.controls);
-        }
 
         $( ".draggable" ).draggable();
         $( ".resizable" ).resizable();
         $( "#text" ).draggable();
 
         $("#pannelButton").click(function (e) {
-          m.createPanel()
+          GK.cmds.createPanel()
         })
     });
     </script>
