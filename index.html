@@ -4,44 +4,51 @@
     <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <style>
-    .std { width: 150px; height: 150px; padding: 0.5em; }
-    /*
-    .draggable { width: 150px; height: 150px; padding: 0.5em; }
-    */
-    .page { background-image: url('grid120.png') }
+    .std-1 { width: 150px; height: 150px; padding: 0.5em; }
+    .page { background-image: url('grid120.png'); height: 1200px; width: 1200px; }
     </style>
     <script>
-    var ctx, obj
+    var GK
     $(function() {
-        ctx = {}
-        ctx.preset = {
-          nextCreationPosition: {
-            left: 120,
-            top: 120
-          },
-          creationPositionIncrements: {
-            left: 10,
-            top: 10
-          },
-          controls: {
-            panel: {
-              width: 120,
-              height: 120
+        GK = (function () {
+          var gk = function () {
+
+          }
+          gk.preset = {
+            nextCreationPosition: {
+              left: 240,
+              top: 120
+            },
+            creationPositionIncrements: {
+              left: 30,
+              top: 30
+            },
+            controls: {
+              panel: {
+                width: 120,
+                height: 120
+              }
             }
           }
-        }
-        ctx.default = $.extend(true, {}, ctx.preset)
-        ctx.utils = {}
-        ctx.utils.creationPosition = function () {
-          var p = $.extend({}, this)
-          this.left += ctx.default.creationPositionIncrements.left
-          this.top += ctx.default.creationPositionIncrements.top
-          return p;
-        }
-        ctx.utils.uiposition = function () {
-          return "left+" + this.left + " top+" + this.top;
-        }
+          gk.ctx = {}
+          var ctx = gk.ctx
+          gk.utils = {}
+          gk.utils.creationPosition = function () {
+            var p = $.extend({}, this)
+            // this: { left: (int), top: (int) }
+            this.left += ctx.default.creationPositionIncrements.left
+            this.top += ctx.default.creationPositionIncrements.top
+            return p;
+          }
+          gk.utils.uiposition = function () {
+            // this: { left: (int), top: (int) }
+            return "left+" + this.left + " top+" + this.top;
+          }
 
+          return gk;
+        })()
+        var ctx = GK.ctx
+        ctx.default = $.extend(true, {}, GK.preset)
         ctx.$page = $(".page")
         ctx.manager = {}
         ctx.nextCreationPosition = $.extend({}, ctx.default.nextCreationPosition)
@@ -50,13 +57,13 @@
         console.log(ctx.$page.position());
         m.createPanel = function () {
           var control = $.extend(true, {}, ctx.default.controls["panel"])
-          control.position = ctx.utils.creationPosition.apply(ctx.nextCreationPosition)
+          control.position = GK.utils.creationPosition.apply(ctx.nextCreationPosition)
           console.log(control);
 
-          var elm = $("<div class='ui-widget-content std draggable resizable'>aaa</div>")
+          var elm = $("<div class='ui-widget-content draggable resizable'>aaa</div>")
           .appendTo(ctx.$page)
           .draggable()
-          .position({ my: "left top", at: ctx.utils.uiposition.apply(control.position), of: ctx.$page})
+          .position({ my: "left top", at: GK.utils.uiposition.apply(control.position), of: ctx.$page})
           .uniqueId()
           .height(control.height).width(control.width)
 
@@ -78,19 +85,13 @@
 </head>
 <body style="">
   <div class="page">
-    <div class="ui-widget-content std draggable resizable">
+    <div class="ui-widget-content std-1 draggable resizable">
         <button>Input Text</button>
         <button id="pannelButton">Pannel</button>
         <button id="headerButton">Header</button>
         <button>Footer</button>
         <button>Left Sidebar</button>
         <button>Right Sidebar</button>
-    </div>
-    <div class="ui-widget-content std draggable resizable">
-        <p>Drag me around</p>
-    </div>
-    <div id="text" style="padding: 8">
-    <input type="text" size="20" />
     </div>
   </div>
 </body>
