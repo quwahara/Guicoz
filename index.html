@@ -34,6 +34,8 @@
           gk.ctx = {}
           var ctx = gk.ctx
           ctx.controls = {}
+          ctx.elms = {}
+          ctx.ctrls = {}
           ctx.$page = $(".page")
           gk.utils = {}
           gk.utils.creationPosition = function () {
@@ -57,8 +59,9 @@
             .position({ my: "left top", at: GK.utils.uiposition.apply(control.position), of: ctx.$page})
             .uniqueId()
             .height(control.height).width(control.width)
-            control.elm = elm
-            ctx.controls[elm.attr("id")] = control
+            var id = elm.attr("id")
+            ctx.elms[id] = elm
+            ctx.ctrls[id] = control
           }
           return gk;
         })()
@@ -73,6 +76,28 @@
         $("#pannelButton").click(function (e) {
           GK(["createPanel"])
         })
+        $("#headerButton").click(function (e) {
+          var d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GK.ctx.ctrls))
+          var a = document.createElement('a')
+          a.setAttribute("href", d)
+          a.setAttribute("download", "data.json")
+          a.click()
+        })
+
+        function handleFileSelect(evt) {
+          var files = evt.target.files; // FileList object
+          console.log(files);
+          if(files.length < 1) { return; }
+
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            console.log(reader.result);
+            console.log(JSON.parse(reader.result));
+          }
+          reader.readAsText(files[0]);
+        }
+
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
     });
     </script>
 </head>
@@ -85,6 +110,7 @@
         <button>Footer</button>
         <button>Left Sidebar</button>
         <button>Right Sidebar</button>
+        <input type="file" id="files" name="files[]" />
     </div>
   </div>
 </body>
