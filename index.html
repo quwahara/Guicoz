@@ -17,12 +17,12 @@
           }
           gk.preset = {
             nextCreationPosition: {
-              left: 240,
-              top: 120
+              top: 120,
+              left: 240
             },
             creationPositionIncrements: {
-              left: 10,
-              top: 10
+              top: 10,
+              left: 10
             },
             controls: {
               panel: {
@@ -41,13 +41,25 @@
           gk.utils.creationPosition = function () {
             var p = $.extend({}, this)
             // this: { left: (int), top: (int) }
-            this.left += ctx.default.creationPositionIncrements.left
             this.top += ctx.default.creationPositionIncrements.top
+            this.left += ctx.default.creationPositionIncrements.left
             return p;
           }
-          gk.utils.uiposition = function () {
-            // this: { left: (int), top: (int) }
-            return "left+" + this.left + " top+" + this.top;
+          gk.utils.uiPosition = function (position) {
+            return "left+" + position.left + " top+" + position.top;
+          }
+          gk.utils.positionInPage = function (position) {
+            var pageOffset = ctx.$page.offset()
+            return { top: position.top - pageOffset.top, left: position.left - pageOffset.left };
+          }
+          gk.utils.elmPosInPage = function (elm) {
+            return gk.utils.positionInPage($(elm).position());
+          }
+          gk.utils.applyAllElmPosToCtrl = function () {
+            var self = this
+            $.each(gk.ctx.elms, function (id, elm) {
+              gk.ctx.ctrls[id].position = self.elmPosInPage(elm)
+            })
           }
           gk.cmds = {}
           gk.cmds.clearPage = function () {
@@ -55,13 +67,14 @@
             ctx.elms = {}
             ctx.ctrls = {}
           }
-          gk.cmds.createPanel = function () {
-            var control = $.extend(true, {}, ctx.default.controls["panel"])
-            control.position = gk.utils.creationPosition.apply(ctx.nextCreationPosition)
+          gk.cmds.createPanel = function (c, control) {
+            control = control || $.extend(true, {}, ctx.default.controls["panel"])
+            control.position = control.position || gk.utils.creationPosition.apply(ctx.nextCreationPosition)
+            console.log(control);
             var elm = $("<div class='ui-widget-content gk-ctrl draggable resizable'>sss</div>")
             .appendTo(ctx.$page)
             .draggable()
-            .position({ my: "left top", at: GK.utils.uiposition.apply(control.position), of: ctx.$page})
+            .position({ my: "left top", at: GK.utils.uiPosition(control.position), of: ctx.$page})
             .uniqueId()
             .height(control.height).width(control.width)
             var id = elm.attr("id")
@@ -82,17 +95,23 @@
         $("#pannelButton").click(function (e) {
           GK(["createPanel"])
         })
-        $("#headerButton").click(function (e) {
+        $("#testFlightButton").click(function (e) {
+          $.each(ctx.elms, function (id, elm) {
+            console.log(id);
+            console.log(GK.utils.elmPosInPage(elm));
+          })
+        })
+        $("#clearPageButton").click(function (e) {
+          GK(["clearPage"])
+        })
+        $("#saveButton").click(function (e) {
+          GK.utils.applyAllElmPosToCtrl()
           var d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GK.ctx.ctrls))
           var a = document.createElement('a')
           a.setAttribute("href", d)
           a.setAttribute("download", "data.json")
           a.click()
         })
-        $("#clearPageButton").click(function (e) {
-          GK(["clearPage"])
-        })
-
         function handleFileSelect(evt) {
           var files = evt.target.files; // FileList object
           console.log(files);
@@ -101,7 +120,16 @@
           var reader = new FileReader();
           reader.onload = function (e) {
             console.log(reader.result);
-            console.log(JSON.parse(reader.result));
+            try {
+              var ctrls = JSON.parse(reader.result)
+              console.log(ctrls);
+              $.each(ctrls, function (id, ctrl) {
+                // console.log(id, ctrl);
+                GK(["createPanel", ctrl])
+              })
+            } catch (e) {
+              console.error(e);
+            }
           }
           reader.readAsText(files[0]);
         }
@@ -119,7 +147,9 @@
         <button>Footer</button>
         <button>Left Sidebar</button>
         <button>Right Sidebar</button>
+        <button id="testFlightButton">Test Flight</button>
         <button id="clearPageButton">Clear Page</button>
+        <button id="saveButton">Save</button>
         <input type="file" id="files" name="files[]" />
     </div>
   </div>
