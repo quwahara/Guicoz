@@ -73,7 +73,7 @@
             console.log(control);
             var elm = $("<div class='ui-widget-content gk-ctrl draggable resizable'>sss</div>")
             .appendTo(ctx.$page)
-            .draggable()
+            .draggable({ grid: [10, 10]})
             .position({ my: "left top", at: GK.utils.uiPosition(control.position), of: ctx.$page})
             .uniqueId()
             .height(control.height).width(control.width)
