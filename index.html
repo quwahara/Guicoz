@@ -21,8 +21,8 @@
               top: 120
             },
             creationPositionIncrements: {
-              left: 30,
-              top: 30
+              left: 10,
+              top: 10
             },
             controls: {
               panel: {
@@ -50,16 +50,22 @@
             return "left+" + this.left + " top+" + this.top;
           }
           gk.cmds = {}
+          gk.cmds.clearPage = function () {
+            $(".gk-ctrl").remove()
+            ctx.elms = {}
+            ctx.ctrls = {}
+          }
           gk.cmds.createPanel = function () {
             var control = $.extend(true, {}, ctx.default.controls["panel"])
             control.position = gk.utils.creationPosition.apply(ctx.nextCreationPosition)
-            var elm = $("<div class='ui-widget-content draggable resizable'>sss</div>")
+            var elm = $("<div class='ui-widget-content gk-ctrl draggable resizable'>sss</div>")
             .appendTo(ctx.$page)
             .draggable()
             .position({ my: "left top", at: GK.utils.uiposition.apply(control.position), of: ctx.$page})
             .uniqueId()
             .height(control.height).width(control.width)
             var id = elm.attr("id")
+            console.log(id);
             ctx.elms[id] = elm
             ctx.ctrls[id] = control
           }
@@ -82,6 +88,9 @@
           a.setAttribute("href", d)
           a.setAttribute("download", "data.json")
           a.click()
+        })
+        $("#clearPageButton").click(function (e) {
+          GK(["clearPage"])
         })
 
         function handleFileSelect(evt) {
@@ -110,6 +119,7 @@
         <button>Footer</button>
         <button>Left Sidebar</button>
         <button>Right Sidebar</button>
+        <button id="clearPageButton">Clear Page</button>
         <input type="file" id="files" name="files[]" />
     </div>
   </div>
