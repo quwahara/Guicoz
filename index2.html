@@ -1,0 +1,229 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <style>
+    .std-1 { width: 150px; height: 150px; padding: 0.5em; }
+    .page { background-image: url('grid120.png'); height: 1200px; width: 1200px; }
+    body { height: 100%; width: 100%; }
+    .ui-tabs { height: 100%; width: 100%; overflow: scroll; }
+    .ui-tabs .ui-tabs-panel { overflow: scroll; }
+    .sheet { width: 2000px; height: 2000px; background-image: url('grid120.png'); }
+    /*
+    .ui-tabs { margin: 0; padding: 0; border: 0; }
+    .ui-tabs .ui-tabs-nav { margin: 0; padding: 0; border: 0; }
+    .ui-tabs .ui-tabs-panel { margin: 0; padding: 0; border: 0; }
+    .sheet { margin: 0; padding: 0; border: 0; }
+    .ctrl { position:absolute; margin: 0; padding: 0; border: 0; }
+    */
+    .sheet { position: relative; }
+    .ctrl { position:absolute; }
+    </style>
+    <script>
+    var GK
+    $(function() {
+        GK = (function () {
+          var gk = function (cmd) {
+            var self = this
+            GK.cmds[cmd[0]].apply(GK, cmd)
+          }
+          gk.ctrlPersistentStyles = ["left", "top", "width", "height"]
+          gk.preset = {
+            nextCreationPosition: {
+              left: 240,
+              top: 120
+            },
+            creationPositionIncrements: {
+              left: 10,
+              top: 10
+            },
+            ctrls: {
+              ctrl: {
+                width: 120,
+                height: 120
+              }
+            }
+          }
+          gk.utils = {}
+          gk.utils.uiPosition = function (position) {
+            return "left+" + position.left + " top+" + position.top;
+          }
+          gk.utils.positionInSheet = function (position) {
+            var sheetOffset = gk.sheet().elm.offset()
+            return { top: position.top - sheetOffset.top, left: position.left - sheetOffset.left };
+          }
+          gk.utils.elmPosInSheet = function (elm) {
+            return gk.utils.positionInSheet($(elm).position());
+          }
+          gk.utils.applyAllElmPosToCtrl = function () {
+            $(".ctrl").each(function () {
+              var elm = this
+              $.each(gk.ctrlPersistentStyles, function (index, name) {
+                gk.spec.all[elm.id][name] = $(elm).css(name)
+              })
+            })
+          }
+          gk.init = function () {
+
+            gk.elm = { room: { elm: $("<div class='room'></div>").uniqueId().appendTo("body") } }
+            gk.room = function () {
+              return gk.elm.room;
+            }
+            var roomId = gk.elm.room.elm.attr("id")
+            gk.spec = {
+              preference: $.extend(true, {}, gk.preset),
+              all: {},
+              room: {
+                id: roomId,
+                selected: null,
+                desks: {}
+              }
+            }
+            gk.spec.all[roomId] = gk.spec.room
+
+            gk.elm.room.desks = {}
+            GK(["addDesk"])
+            gk.desk = function () {
+              return gk.elm.room.desk;
+            }
+            gk.deskSpec = function () {
+              return gk.spec.room.desks[gk.spec.room.selected];
+            }
+
+            gk.elm.room.desk.books = {}
+            GK(["addBook"])
+            gk.book = function () {
+              return gk.elm.room.desk.book;
+            }
+            gk.bookSpec = function () {
+              var deskSpec = gk.deskSpec()
+              return deskSpec.books[deskSpec.selected];
+            }
+
+            gk.elm.room.desk.book.sheets = {}
+            gk.elm.room.desk.book.sheets.count = 0
+
+            gk.elm.room.desk.book.elm.tabs({
+              activate: function (e, ui) {
+                gk.elm.room.desk.book.sheet = gk.elm.room.desk.book.sheets[$("#" + ui.newPanel.attr("id")).find(".sheet").attr("id")]
+              }
+            })
+            GK(["addSheet"])
+            gk.sheet = function () {
+              return gk.elm.room.desk.book.sheet;
+            }
+            gk.sheetSpec = function () {
+              var bookSpec = gk.bookSpec()
+              return bookSpec.sheets[bookSpec.selected];
+            }
+          }
+          gk.cmds = {}
+          gk.cmds.addDesk = function () {
+            var desk = $("<div class='desk'></div>").uniqueId().appendTo(gk.elm.room.elm)
+            var deskId = desk.attr("id")
+            gk.elm.room.desk = { elm: desk }
+            gk.elm.room.desks[deskId] = gk.elm.room.desk
+            var deskSpec = {
+              id: deskId,
+              selected: null,
+              books: {}
+            }
+            gk.spec.room.selected = deskId
+            gk.spec.room.desks[deskId] = deskSpec
+            gk.spec.all[deskId] = deskSpec
+          }
+          gk.cmds.addBook = function () {
+            var book = $("<div class='book'><ul></ul></div>").uniqueId().appendTo(gk.elm.room.desk.elm)
+            var bookId = book.attr("id")
+            gk.elm.room.desk.book = { elm: book, tabTitles: book.find("ul") }
+            gk.elm.room.desk.books[bookId] = gk.elm.room.desk.book
+            var bookSpec = {
+              preference: $.extend(true, {}, gk.spec.preference),
+              id: bookId,
+              selected: null,
+              sheets: {}
+            }
+            var deskSpec = gk.deskSpec()
+            deskSpec.selected = bookId
+            deskSpec.books[bookId] = bookSpec
+            gk.spec.all[bookId] = bookSpec
+          }
+          gk.cmds.addSheet = function () {
+            var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(gk.elm.room.desk.book.elm)
+            var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'>" + tabContent.attr("id") + "</a></lid>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
+            var sheet = $("<div class='sheet'></div>").uniqueId().appendTo(tabContent)
+            var sheetId = sheet.attr("id")
+            var book = gk.book()
+            book.sheet = { elm: sheet, selected: null, ctrls: {} }
+            book.sheets.count += 1
+            book.sheets[sheetId] = book.sheet
+            book.elm.tabs("refresh")
+            book.elm.tabs({active: book.sheets.count - 1})
+            var bookSpec = gk.bookSpec()
+            var sheetSpec = {
+              nextCreationPosition: $.extend(true, {}, bookSpec.preference.nextCreationPosition),
+              id: sheetId,
+              selected: null,
+              ctrls: {}
+            }
+            bookSpec.selected = sheetId
+            bookSpec.sheets[sheetId] = sheetSpec
+            gk.spec.all[sheetId] = sheetSpec
+          }
+          gk.cmds.addCtrl = function () {
+            var preference = gk.bookSpec().preference
+            var sheetSpec = gk.sheetSpec()
+            var nextCreationPosition = sheetSpec.nextCreationPosition
+            var ctrlSpec = $.extend(true, {}, preference.ctrls.ctrl, nextCreationPosition)
+            nextCreationPosition.left += gk.spec.preference.creationPositionIncrements.left
+            nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
+            var ctrl = $("<div class='ctrl ui-widget-content'></div>")
+            .appendTo(gk.sheet().elm)
+            .draggable({grid:[1,1]})
+            .css("left", ctrlSpec.left).css("top", ctrlSpec.top)
+            .width(ctrlSpec.width).height(ctrlSpec.height)
+            .uniqueId()
+            var ctrlId = ctrl.attr("id")
+            gk.sheet().ctrl = { elm: ctrl }
+            gk.sheet().ctrls[ctrlId] = gk.sheet().ctrl
+            ctrlSpec.id = ctrlId
+            sheetSpec.selected = ctrlId
+            sheetSpec.ctrls[ctrlId] = ctrlSpec
+            gk.spec.all[ctrlId] = ctrlSpec
+          }
+          gk.cmds.download = function (e) {
+            gk.utils.applyAllElmPosToCtrl()
+            var d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GK.spec.room))
+            var a = document.createElement('a')
+            a.setAttribute("href", d)
+            a.setAttribute("download", "data.json")
+            a.click()
+          }
+          return gk;
+        })()
+        GK.init()
+        console.log(GK.spec);
+        $("#testFlightButton").click(function () {
+          console.log(GK.spec);
+          GK.utils.applyAllElmPosToCtrl()
+        })
+        $("#addSheet").click(function () {
+          GK(["addSheet"])
+        })
+        $("#addCtrl").click(function () {
+          GK(["addCtrl"])
+        })
+        $("#download").click(function (e) {
+          GK(["download"])
+        })
+    });
+    </script>
+</head>
+<body>
+  <button id="addSheet">Add sheet</button>
+  <button id="addCtrl">Add ctrl</button>
+  <button id="download">Download</button>
+  <button id="testFlightButton">Test Flight</button>
+</body>
+</html>
