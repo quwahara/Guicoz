@@ -5,11 +5,11 @@
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <style>
     .std-1 { width: 150px; height: 150px; padding: 0.5em; }
-    .page { background-image: url('grid120.png'); height: 1200px; width: 1200px; }
+    .page { background-image: url('grid100.png'); height: 1200px; width: 1200px; }
     body { height: 100%; width: 100%; }
     .ui-tabs { height: 100%; width: 100%; overflow: scroll; }
     .ui-tabs .ui-tabs-panel { overflow: scroll; }
-    .sheet { width: 2000px; height: 2000px; background-image: url('grid120.png'); }
+    .sheet { width: 2000px; height: 2000px; background-image: url('grid100.png'); }
     /*
     .ui-tabs { margin: 0; padding: 0; border: 0; }
     .ui-tabs .ui-tabs-nav { margin: 0; padding: 0; border: 0; }
@@ -75,6 +75,7 @@
               preference: $.extend(true, {}, gk.preset),
               all: {},
               room: {
+                specOf: "room",
                 id: roomId,
                 selected: null,
                 desks: {}
@@ -106,7 +107,9 @@
 
             gk.elm.room.desk.book.elm.tabs({
               activate: function (e, ui) {
-                gk.elm.room.desk.book.sheet = gk.elm.room.desk.book.sheets[$("#" + ui.newPanel.attr("id")).find(".sheet").attr("id")]
+                var sheetId = $("#" + ui.newPanel.get(0).id).find(".sheet").get(0).id
+                gk.elm.room.desk.book.sheet = gk.elm.room.desk.book.sheets[sheetId]
+                gk.bookSpec().selected = sheetId
               }
             })
             GK(["addSheet"])
@@ -125,6 +128,7 @@
             gk.elm.room.desk = { elm: desk }
             gk.elm.room.desks[deskId] = gk.elm.room.desk
             var deskSpec = {
+              specOf: "desk",
               id: deskId,
               selected: null,
               books: {}
@@ -139,8 +143,9 @@
             gk.elm.room.desk.book = { elm: book, tabTitles: book.find("ul") }
             gk.elm.room.desk.books[bookId] = gk.elm.room.desk.book
             var bookSpec = {
-              preference: $.extend(true, {}, gk.spec.preference),
+              specOf: "book",
               id: bookId,
+              preference: $.extend(true, {}, gk.spec.preference),
               selected: null,
               sheets: {}
             }
@@ -162,8 +167,11 @@
             book.elm.tabs({active: book.sheets.count - 1})
             var bookSpec = gk.bookSpec()
             var sheetSpec = {
-              nextCreationPosition: $.extend(true, {}, bookSpec.preference.nextCreationPosition),
+              specOf: "sheet",
               id: sheetId,
+              tabTitleId: tabTitle.get(0).id,
+              tabContentId: tabContent.get(0).id,
+              nextCreationPosition: $.extend(true, {}, bookSpec.preference.nextCreationPosition),
               selected: null,
               ctrls: {}
             }
@@ -171,11 +179,32 @@
             bookSpec.sheets[sheetId] = sheetSpec
             gk.spec.all[sheetId] = sheetSpec
           }
+          gk.cmds.removeSheet = function (cmd, sheet) {
+            sheet = sheet || gk.sheet()
+            var sheetId = sheet.elm.get(0).id
+            var sheetSpec = gk.spec.all[sheetId]
+          }
+          // gk.cmds.isCtrlIdInSheetSpec = function (cmd, ctrlId, sheetSpec) {
+          //   sheetSpec = sheetSpec || gk.sheetSpec()
+          //   var isIn = false
+          //   $.each(sheetSpec.ctrls, function (i, name) {
+          //     isIn = ctrlId in sheetSpec.ctrls
+          //     return !isIn;
+          //   })
+          //   return isIn;
+          // }
+          // gk.cmds.findSheetSpecHavingCtrlId = function (cmd, ctrlId) {
+          //   var sheetSpec
+          //   $.each(gk.spec.all, function (i, name) {
+          //     console.log(i);
+          //     console.log(name);
+          //   })
+          // }
           gk.cmds.addCtrl = function () {
             var preference = gk.bookSpec().preference
             var sheetSpec = gk.sheetSpec()
             var nextCreationPosition = sheetSpec.nextCreationPosition
-            var ctrlSpec = $.extend(true, {}, preference.ctrls.ctrl, nextCreationPosition)
+            var ctrlSpec = $.extend(true, { specOf: "ctrl", id: null }, preference.ctrls.ctrl, nextCreationPosition)
             nextCreationPosition.left += gk.spec.preference.creationPositionIncrements.left
             nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
             var ctrl = $("<div class='ctrl ui-widget-content'></div>")
@@ -184,13 +213,27 @@
             .css("left", ctrlSpec.left).css("top", ctrlSpec.top)
             .width(ctrlSpec.width).height(ctrlSpec.height)
             .uniqueId()
-            var ctrlId = ctrl.attr("id")
+            .on("click", function (e) {
+              console.log(this.id);
+            })
+            var ctrlId = ctrl.get(0).id
+            ctrl.text(ctrlId)
             gk.sheet().ctrl = { elm: ctrl }
             gk.sheet().ctrls[ctrlId] = gk.sheet().ctrl
             ctrlSpec.id = ctrlId
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
             gk.spec.all[ctrlId] = ctrlSpec
+          }
+          gk.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
+            sheetId = sheetId || (gk.sheet().elm.get(0).id)
+            var sheetSpec = gk.spec.all[sheetId]
+            $.each($.map(sheetSpec.ctrls, function (value, name) { return name; }), function (i, id) {
+              delete sheetSpec.ctrls[id]
+              delete gk.spec.all[id]
+              $("#" + id).remove()
+            })
+            sheetSpec.selected = null
           }
           gk.cmds.download = function (e) {
             gk.utils.applyAllElmPosToCtrl()
@@ -205,8 +248,8 @@
         GK.init()
         console.log(GK.spec);
         $("#testFlightButton").click(function () {
-          console.log(GK.spec);
-          GK.utils.applyAllElmPosToCtrl()
+          // GK(["findSheetHavingCtrl"])
+          GK(["removeAllCtrlInSheet"])
         })
         $("#addSheet").click(function () {
           GK(["addSheet"])
@@ -217,6 +260,28 @@
         $("#download").click(function (e) {
           GK(["download"])
         })
+        function handleFileSelect(evt) {
+          var files = evt.target.files; // FileList object
+          // console.log(files);
+          if(files.length < 1) { return; }
+
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            // console.log(reader.result);
+            try {
+              var ctrls = JSON.parse(reader.result)
+              console.log(ctrls);
+              // $.each(ctrls, function (id, ctrl) {
+              //   // console.log(id, ctrl);
+              //   GK(["createPanel", ctrl])
+              // })
+            } catch (e) {
+              console.error(e);
+            }
+          }
+          reader.readAsText(files[0]);
+        }
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
     });
     </script>
 </head>
@@ -224,6 +289,7 @@
   <button id="addSheet">Add sheet</button>
   <button id="addCtrl">Add ctrl</button>
   <button id="download">Download</button>
+  <input id="files" type="file" name="files[]" />
   <button id="testFlightButton">Test Flight</button>
 </body>
 </html>
