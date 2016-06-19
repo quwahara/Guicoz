@@ -71,8 +71,6 @@
               return gk.elm.room;
             }
             var roomId = gk.elm.room.elm.attr("id")
-            gk.allElm = {}
-            gk.allElm[roomId] = gk.elm.room
             gk.spec = {
               preference: $.extend(true, {}, gk.preset),
               room: {
@@ -128,7 +126,6 @@
             var deskId = desk.attr("id")
             gk.elm.room.desk = { elm: desk }
             gk.elm.room.desks[deskId] = gk.elm.room.desk
-            gk.allElm[deskId] = gk.elm.room.desk
             var roomSpec = gk.spec.room
             var deskSpec = {
               specOf: "desk",
@@ -156,7 +153,6 @@
             var bookId = book.attr("id")
             gk.elm.room.desk.book = { elm: book, tabTitles: book.find("ul") }
             gk.elm.room.desk.books[bookId] = gk.elm.room.desk.book
-            gk.allElm[bookId] = gk.elm.room.desk.book
             var deskSpec = gk.deskSpec()
             var bookSpec = {
               specOf: "book",
@@ -210,7 +206,6 @@
               selected: null,
               ctrls: {}
             }
-            gk.allElm[sheetId] = book.sheet
             bookSpec.selected = sheetId
             bookSpec.sheets[sheetId] = sheetSpec
             gk.allSpec[sheetId] = sheetSpec
@@ -282,7 +277,6 @@
             ctrl.text(ctrlId)
             gk.sheet().ctrl = { elm: ctrl }
             gk.sheet().ctrls[ctrlId] = gk.sheet().ctrl
-            gk.allElm[ctrlId] = gk.sheet().ctrl
             ctrlSpec.id = ctrlId
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
