@@ -186,7 +186,7 @@
           }
           gk.cmds.removeSheet = function (cmd, sheetId) {
             sheetId = sheetId || (gk.sheet().elm.get(0).id)
-            var bookId = gk(["findParentId", sheetId])
+            var bookId = gk.spec.all[sheetId].parentId
             if(bookId) {
               gk(["removeAllCtrlInSheet", sheetId])
               var sheetSpec = gk.spec.all[sheetId]
@@ -249,7 +249,7 @@
             sheetSpec.selected = null
           }
           gk.cmds.removeCtrl = function (cmd, ctrlId) {
-            var sheetId = gk.cmds.findParentId(cmd, ctrlId)
+            var sheetId = gk.spec.all[ctrlId].parentId
             if(sheetId) {
               delete gk.spec.all[sheetId].ctrls[ctrlId]
               delete gk.spec.all[ctrlId]
@@ -272,12 +272,12 @@
         $("#testFlightButton").click(function () {
           var arg1 = $("#testText").val()
           // GK(["findSheetHavingCtrl"])
-          // GK(["removeAllCtrlInSheet"], arg1)
           GK(["removeSheet"], arg1)
+          // GK(["removeAllCtrlInSheet"], arg1)
+          // GK(["removeCtrl", arg1])
           // var res = GK(["findParentId", $("#testText").val()])
           // console.log("# res");
           // console.log(res);
-          // GK(["removeCtrl", arg1])
         })
         $("#addSheet").click(function () {
           GK(["addSheet"])
