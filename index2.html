@@ -189,7 +189,7 @@
             }
           }
           gk.cmds.addSheet = function (cmd, bookSpec) {
-            var book = gk.book()
+            var book = gk.allElm[bookSpec.id]
             var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(gk.elm.room.desk.book.elm)
             var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></li>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
             var sheet = $("<div class='sheet'></div>").uniqueId().appendTo(tabContent)
@@ -210,7 +210,6 @@
               selected: null,
               ctrls: {}
             }
-            gk.allElm
             bookSpec.selected = sheetId
             bookSpec.sheets[sheetId] = sheetSpec
             gk.allSpec[sheetId] = sheetSpec
