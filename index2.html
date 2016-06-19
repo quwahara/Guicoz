@@ -26,7 +26,7 @@
         GK = (function () {
           var gk = function (cmd) {
             var self = this
-            GK.cmds[cmd[0]].apply(GK, cmd)
+            return GK.cmds[cmd[0]].apply(GK, cmd);
           }
           gk.ctrlPersistentStyles = ["left", "top", "width", "height"]
           gk.preset = {
@@ -179,11 +179,27 @@
             bookSpec.sheets[sheetId] = sheetSpec
             gk.spec.all[sheetId] = sheetSpec
           }
-          gk.cmds.removeSheet = function (cmd, sheet) {
-            sheet = sheet || gk.sheet()
-            var sheetId = sheet.elm.get(0).id
-            var sheetSpec = gk.spec.all[sheetId]
+          gk.cmds.removeSheet = function (cmd, sheetId) {
+            sheetId = sheetId || (gk.sheet().elm.get(0).id)
+            gk.cmds.removeAllCtrlInSheet(cmd, sheetId)
           }
+          gk.cmds.findParentId = function (cmd, id) {
+            var parentId = null
+            $.each(gk.spec.all, function (idInAll, spec) {
+              if(
+                spec.specOf === "sheet" && (id in spec.ctrls)
+                || spec.specOf === "book" && (id in spec.sheets)
+                || spec.specOf === "desk" && (id in spec.books)
+                || spec.specOf === "room" && (id in spec.desks)
+              ) {
+                parentId = idInAll
+                return false;
+              }
+            })
+            return parentId;
+          }
+
+
           // gk.cmds.isCtrlIdInSheetSpec = function (cmd, ctrlId, sheetSpec) {
           //   sheetSpec = sheetSpec || gk.sheetSpec()
           //   var isIn = false
@@ -232,6 +248,7 @@
               delete sheetSpec.ctrls[id]
               delete gk.spec.all[id]
               $("#" + id).remove()
+              console.debug("Removed #" + id)
             })
             sheetSpec.selected = null
           }
@@ -249,7 +266,11 @@
         console.log(GK.spec);
         $("#testFlightButton").click(function () {
           // GK(["findSheetHavingCtrl"])
-          GK(["removeAllCtrlInSheet"])
+          // GK(["removeAllCtrlInSheet"])
+          // GK(["removeSheet"])
+          var res = GK(["findParentId", $("#testText").val()])
+          console.log("# res");
+          console.log(res);
         })
         $("#addSheet").click(function () {
           GK(["addSheet"])
@@ -290,6 +311,7 @@
   <button id="addCtrl">Add ctrl</button>
   <button id="download">Download</button>
   <input id="files" type="file" name="files[]" />
+  <input id="testText" type="text" />
   <button id="testFlightButton">Test Flight</button>
 </body>
 </html>
