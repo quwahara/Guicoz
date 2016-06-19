@@ -127,14 +127,16 @@
             var deskId = desk.attr("id")
             gk.elm.room.desk = { elm: desk }
             gk.elm.room.desks[deskId] = gk.elm.room.desk
+            var roomSpec = gk.spec.room
             var deskSpec = {
               specOf: "desk",
               id: deskId,
+              parentId: roomSpec.id,
               selected: null,
               books: {}
             }
-            gk.spec.room.selected = deskId
-            gk.spec.room.desks[deskId] = deskSpec
+            roomSpec.selected = deskId
+            roomSpec.desks[deskId] = deskSpec
             gk.spec.all[deskId] = deskSpec
           }
           gk.cmds.addBook = function () {
@@ -142,14 +144,15 @@
             var bookId = book.attr("id")
             gk.elm.room.desk.book = { elm: book, tabTitles: book.find("ul") }
             gk.elm.room.desk.books[bookId] = gk.elm.room.desk.book
+            var deskSpec = gk.deskSpec()
             var bookSpec = {
               specOf: "book",
               id: bookId,
+              parentId: deskSpec.id,
               preference: $.extend(true, {}, gk.spec.preference),
               selected: null,
               sheets: {}
             }
-            var deskSpec = gk.deskSpec()
             deskSpec.selected = bookId
             deskSpec.books[bookId] = bookSpec
             gk.spec.all[bookId] = bookSpec
@@ -170,6 +173,7 @@
             var sheetSpec = {
               specOf: "sheet",
               id: sheetId,
+              parentId: bookSpec.id,
               tabTitleId: tabTitle.get(0).id,
               tabContentId: tabContent.get(0).id,
               nextCreationPosition: $.extend(true, {}, bookSpec.preference.nextCreationPosition),
@@ -214,7 +218,7 @@
             var preference = gk.bookSpec().preference
             var sheetSpec = gk.sheetSpec()
             var nextCreationPosition = sheetSpec.nextCreationPosition
-            var ctrlSpec = $.extend(true, { specOf: "ctrl", id: null }, preference.ctrls.ctrl, nextCreationPosition)
+            var ctrlSpec = $.extend(true, { specOf: "ctrl", id: null, parentId: null }, preference.ctrls.ctrl, nextCreationPosition)
             nextCreationPosition.left += gk.spec.preference.creationPositionIncrements.left
             nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
             var ctrl = $("<div class='ctrl ui-widget-content'></div>")
@@ -231,6 +235,7 @@
             gk.sheet().ctrl = { elm: ctrl }
             gk.sheet().ctrls[ctrlId] = gk.sheet().ctrl
             ctrlSpec.id = ctrlId
+            ctrlSpec.parentId = sheetSpec.id
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
             gk.spec.all[ctrlId] = ctrlSpec
