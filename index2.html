@@ -250,13 +250,24 @@
             })
             return parentId;
           }
-          gk.cmds.addCtrl = function () {
+          gk.cmds.addCtrl = function (cmd, ctrlSpec) {
             var preference = gk.bookSpec().preference
             var sheetSpec = gk.sheetSpec()
             var nextCreationPosition = sheetSpec.nextCreationPosition
-            var ctrlSpec = $.extend(true, { specOf: "ctrl", id: null, parentId: null }, preference.ctrls.ctrl, nextCreationPosition)
-            nextCreationPosition.left += gk.spec.preference.creationPositionIncrements.left
-            nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
+
+            ctrlSpec = ctrlSpec || {}
+            ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
+            ctrlSpec.id = null
+            ctrlSpec.parentId = sheetSpec.id
+            ctrlSpec.width = ctrlSpec.width || preference.ctrls.ctrl.width
+            ctrlSpec.height = ctrlSpec.height || preference.ctrls.ctrl.height
+            if(ctrlSpec.left === undefined || ctrlSpec.top === undefined) {
+              ctrlSpec.left = nextCreationPosition.left
+              ctrlSpec.top = nextCreationPosition.top
+              nextCreationPosition.left += gk.spec.preference.creationPositionIncrements.left
+              nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
+            }
+
             var ctrl = $("<div class='ctrl ui-widget-content'></div>")
             .appendTo(gk.sheet().elm)
             .draggable({grid:[1,1]})
