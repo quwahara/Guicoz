@@ -156,9 +156,10 @@
           }
           gk.cmds.addSheet = function () {
             var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(gk.elm.room.desk.book.elm)
-            var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'>" + tabContent.attr("id") + "</a></lid>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
+            var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></lid>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
             var sheet = $("<div class='sheet'></div>").uniqueId().appendTo(tabContent)
             var sheetId = sheet.attr("id")
+            var tabTitle = $("#" + tabTitle.get(0).id).find("a").text(sheetId)
             var book = gk.book()
             book.sheet = { elm: sheet, selected: null, ctrls: {} }
             book.sheets.count += 1
@@ -198,24 +199,6 @@
             })
             return parentId;
           }
-
-
-          // gk.cmds.isCtrlIdInSheetSpec = function (cmd, ctrlId, sheetSpec) {
-          //   sheetSpec = sheetSpec || gk.sheetSpec()
-          //   var isIn = false
-          //   $.each(sheetSpec.ctrls, function (i, name) {
-          //     isIn = ctrlId in sheetSpec.ctrls
-          //     return !isIn;
-          //   })
-          //   return isIn;
-          // }
-          // gk.cmds.findSheetSpecHavingCtrlId = function (cmd, ctrlId) {
-          //   var sheetSpec
-          //   $.each(gk.spec.all, function (i, name) {
-          //     console.log(i);
-          //     console.log(name);
-          //   })
-          // }
           gk.cmds.addCtrl = function () {
             var preference = gk.bookSpec().preference
             var sheetSpec = gk.sheetSpec()
@@ -244,13 +227,19 @@
           gk.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
             sheetId = sheetId || (gk.sheet().elm.get(0).id)
             var sheetSpec = gk.spec.all[sheetId]
-            $.each($.map(sheetSpec.ctrls, function (value, name) { return name; }), function (i, id) {
-              delete sheetSpec.ctrls[id]
-              delete gk.spec.all[id]
-              $("#" + id).remove()
-              console.debug("Removed #" + id)
+            $.each(sheetSpec.ctrls, function (ctrlId) {
+              gk(["removeCtrl", ctrlId])
             })
             sheetSpec.selected = null
+          }
+          gk.cmds.removeCtrl = function (cmd, ctrlId) {
+            var sheetId = gk.cmds.findParentId(cmd, ctrlId)
+            if(sheetId) {
+              delete gk.spec.all[sheetId].ctrls[ctrlId]
+              delete gk.spec.all[ctrlId]
+              $("#" + ctrlId).remove()
+              console.debug("Removed #" + ctrlId + " in sheet #" + sheetId)
+            }
           }
           gk.cmds.download = function (e) {
             gk.utils.applyAllElmPosToCtrl()
@@ -265,12 +254,14 @@
         GK.init()
         console.log(GK.spec);
         $("#testFlightButton").click(function () {
+          var arg1 = $("#testText").val()
           // GK(["findSheetHavingCtrl"])
-          // GK(["removeAllCtrlInSheet"])
+          GK(["removeAllCtrlInSheet"], arg1)
           // GK(["removeSheet"])
-          var res = GK(["findParentId", $("#testText").val()])
-          console.log("# res");
-          console.log(res);
+          // var res = GK(["findParentId", $("#testText").val()])
+          // console.log("# res");
+          // console.log(res);
+          // GK(["removeCtrl", arg1])
         })
         $("#addSheet").click(function () {
           GK(["addSheet"])
