@@ -157,6 +157,14 @@
             deskSpec.books[bookId] = bookSpec
             gk.spec.all[bookId] = bookSpec
           }
+          gk.cmds.removeAllBookInDesk = function (cmd, deskId) {
+            deskId = deskId || (gk.desk().elm.get(0).id)
+            var deskSpec = gk.spec.all[deskId]
+            $.each(deskSpec.books, function (bookId) {
+              gk(["removeBook", bookId])
+            })
+            deskSpec.selected = null
+          }
           gk.cmds.removeBook = function (cmd, bookId) {
             bookId = bookId || (gk.book().elm.get(0).id)
             var deskId = gk.spec.all[bookId].parentId
@@ -289,7 +297,8 @@
         console.log(GK.spec);
         $("#testFlightButton").click(function () {
           var arg1 = $("#testText").val()
-          GK(["removeBook", arg1])
+          GK(["removeAllBookInDesk", arg1])
+          // GK(["removeBook", arg1])
           // GK(["removeAllSheetInBook", arg1])
           // GK(["findSheetHavingCtrl"])
           // GK(["removeSheet"], arg1)
