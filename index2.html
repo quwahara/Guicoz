@@ -70,7 +70,9 @@
             gk.room = function () {
               return gk.elm.room;
             }
+            gk.allElm = {}
             var roomId = gk.elm.room.elm.attr("id")
+            gk.allElm[roomId] = gk.elm.room
             gk.spec = {
               preference: $.extend(true, {}, gk.preset),
               room: {
@@ -134,6 +136,7 @@
               selected: null,
               books: {}
             }
+            gk.allElm[deskId] = gk.elm.room.desk
             roomSpec.selected = deskId
             roomSpec.desks[deskId] = deskSpec
             gk.allSpec[deskId] = deskSpec
@@ -153,6 +156,7 @@
             var bookId = book.attr("id")
             gk.elm.room.desk.book = { elm: book, tabTitles: book.find("ul") }
             gk.elm.room.desk.books[bookId] = gk.elm.room.desk.book
+            gk.allElm[bookId] = gk.elm.room.desk.book
             var deskSpec = gk.deskSpec()
             var bookSpec = {
               specOf: "book",
@@ -194,6 +198,7 @@
             $("#" + tabTitle.get(0).id).find("a").text(sheetId)
             book.sheet = { elm: sheet, selected: null, ctrls: {} }
             book.sheets[sheetId] = book.sheet
+            gk.allElm[sheetId] = book.sheet
             book.elm.tabs("refresh")
             book.elm.tabs({active: $("#" + bookSpec.id).find("li").length - 1})
             var sheetSpec = {
@@ -206,6 +211,7 @@
               selected: null,
               ctrls: {}
             }
+            gk.allElm
             bookSpec.selected = sheetId
             bookSpec.sheets[sheetId] = sheetSpec
             gk.allSpec[sheetId] = sheetSpec
@@ -250,7 +256,6 @@
           gk.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
             var preference = gk.bookSpec().preference
             var nextCreationPosition = sheetSpec.nextCreationPosition
-
             ctrlSpec = ctrlSpec || {}
             ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
             ctrlSpec.id = null
@@ -277,6 +282,7 @@
             ctrl.text(ctrlId)
             gk.sheet().ctrl = { elm: ctrl }
             gk.sheet().ctrls[ctrlId] = gk.sheet().ctrl
+            gk.allElm[ctrlId] = gk.sheet().ctrl
             ctrlSpec.id = ctrlId
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
