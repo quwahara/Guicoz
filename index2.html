@@ -255,6 +255,7 @@
           }
           gk.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
             var preference = gk.bookSpec().preference
+            var sheet = gk.allElm[sheetSpec.id]
             var nextCreationPosition = sheetSpec.nextCreationPosition
             ctrlSpec = ctrlSpec || {}
             ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
@@ -270,7 +271,7 @@
             }
 
             var ctrl = $("<div class='ctrl ui-widget-content'></div>")
-            .appendTo(gk.sheet().elm)
+            .appendTo(sheet.elm)
             .draggable({grid:[1,1]})
             .css("left", ctrlSpec.left).css("top", ctrlSpec.top)
             .width(ctrlSpec.width).height(ctrlSpec.height)
@@ -280,9 +281,9 @@
             })
             var ctrlId = ctrl.get(0).id
             ctrl.text(ctrlId)
-            gk.sheet().ctrl = { elm: ctrl }
-            gk.sheet().ctrls[ctrlId] = gk.sheet().ctrl
-            gk.allElm[ctrlId] = gk.sheet().ctrl
+            sheet.ctrl = { elm: ctrl }
+            sheet.ctrls[ctrlId] = sheet.ctrl
+            gk.allElm[ctrlId] = sheet.ctrl
             ctrlSpec.id = ctrlId
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
