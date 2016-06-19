@@ -87,39 +87,28 @@
 
             gk.elm.room.desks = {}
             gk(["addDesk", gk.spec.room])
-            gk.desk = function () {
-              return gk.elm.room.desk;
-            }
             gk.deskSpec = function () {
               return gk.spec.room.desks[gk.spec.room.selected];
             }
-
+            gk.desk = function () {
+              return gk.allElm[gk.deskSpec().id]
+            }
             gk.elm.room.desk.books = {}
             gk(["addBook", gk.deskSpec()])
-            gk.book = function () {
-              return gk.elm.room.desk.book;
-            }
             gk.bookSpec = function () {
               var deskSpec = gk.deskSpec()
               return deskSpec.books[deskSpec.selected];
             }
-
-            gk.elm.room.desk.book.sheets = {}
-
-            gk.elm.room.desk.book.elm.tabs({
-              activate: function (e, ui) {
-                var sheetId = $("#" + ui.newPanel.get(0).id).find(".sheet").get(0).id
-                gk.elm.room.desk.book.sheet = gk.elm.room.desk.book.sheets[sheetId]
-                gk.bookSpec().selected = sheetId
-              }
-            })
-            gk(["addSheet", gk.bookSpec()])
-            gk.sheet = function () {
-              return gk.elm.room.desk.book.sheet;
+            gk.book = function () {
+              return gk.allElm[gk.bookSpec().id]
             }
+            gk(["addSheet", gk.bookSpec()])
             gk.sheetSpec = function () {
               var bookSpec = gk.bookSpec()
               return bookSpec.sheets[bookSpec.selected];
+            }
+            gk.sheet = function () {
+              return gk.allElm[gk.sheetSpec().id]
             }
           }
           gk.cmds = {}
@@ -154,8 +143,13 @@
           gk.cmds.addBook = function (cmd, deskSpec) {
             var desk = gk.allElm[deskSpec.id]
             var book = $("<div class='book'><ul></ul></div>").uniqueId().appendTo(desk.elm)
+            book.tabs({
+              activate: function (e, ui) {
+                gk.bookSpec().selected = $("#" + ui.newPanel.get(0).id).find(".sheet").get(0).id
+              }
+            })
             var bookId = book.attr("id")
-            desk.book = { elm: book, tabTitles: book.find("ul") }
+            desk.book = { elm: book, tabTitles: book.find("ul"), sheets: {} }
             desk.books[bookId] = desk.book
             gk.allElm[bookId] = desk.book
             var bookSpec = {
@@ -190,8 +184,8 @@
           }
           gk.cmds.addSheet = function (cmd, bookSpec) {
             var book = gk.allElm[bookSpec.id]
-            var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(gk.elm.room.desk.book.elm)
-            var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></li>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
+            var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(book.elm)
+            var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></li>").uniqueId().appendTo(book.tabTitles)
             var sheet = $("<div class='sheet'></div>").uniqueId().appendTo(tabContent)
             var sheetId = sheet.attr("id")
             $("#" + tabTitle.get(0).id).find("a").text(sheetId)
@@ -330,8 +324,17 @@
           // console.log("# res");
           // console.log(res);
         })
+        $("#addBook").click(function () {
+          GK(["addBook", GK.deskSpec()])
+        })
+        $("#removeBook").click(function () {
+          GK(["removeBook", GK.bookSpec().id])
+        })
         $("#addSheet").click(function () {
           GK(["addSheet", GK.bookSpec()])
+        })
+        $("#removeSheet").click(function () {
+          GK(["removeSheet", GK.sheetSpec().id])
         })
         $("#addCtrl").click(function () {
           GK(["addCtrl", GK.sheetSpec()])
@@ -365,7 +368,10 @@
     </script>
 </head>
 <body>
+  <button id="addBook">Add book</button>
+  <button id="removeBook">Remove book</button>
   <button id="addSheet">Add sheet</button>
+  <button id="removeSheet">Remove sheet</button>
   <button id="addCtrl">Add ctrl</button>
   <button id="download">Download</button>
   <input id="files" type="file" name="files[]" />
