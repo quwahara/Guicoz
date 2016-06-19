@@ -156,10 +156,10 @@
           }
           gk.cmds.addSheet = function () {
             var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(gk.elm.room.desk.book.elm)
-            var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></lid>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
+            var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></li>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
             var sheet = $("<div class='sheet'></div>").uniqueId().appendTo(tabContent)
             var sheetId = sheet.attr("id")
-            var tabTitle = $("#" + tabTitle.get(0).id).find("a").text(sheetId)
+            $("#" + tabTitle.get(0).id).find("a").text(sheetId)
             var book = gk.book()
             book.sheet = { elm: sheet, selected: null, ctrls: {} }
             book.sheets.count += 1
@@ -182,7 +182,18 @@
           }
           gk.cmds.removeSheet = function (cmd, sheetId) {
             sheetId = sheetId || (gk.sheet().elm.get(0).id)
-            gk.cmds.removeAllCtrlInSheet(cmd, sheetId)
+            var bookId = gk(["findParentId", sheetId])
+            if(bookId) {
+              gk(["removeAllCtrlInSheet", sheetId])
+              var sheetSpec = gk.spec.all[sheetId]
+              $("#" + sheetSpec.tabTitleId).remove()
+              $("#" + sheetSpec.tabContentId).remove()
+              var book = gk.book()
+              book.sheets.count -= 1
+              book.elm.tabs("refresh")
+              delete gk.spec.all[bookId].sheets[sheetId]
+              delete gk.spec.all[sheetId]
+            }
           }
           gk.cmds.findParentId = function (cmd, id) {
             var parentId = null
@@ -256,8 +267,8 @@
         $("#testFlightButton").click(function () {
           var arg1 = $("#testText").val()
           // GK(["findSheetHavingCtrl"])
-          GK(["removeAllCtrlInSheet"], arg1)
-          // GK(["removeSheet"])
+          // GK(["removeAllCtrlInSheet"], arg1)
+          GK(["removeSheet"], arg1)
           // var res = GK(["findParentId", $("#testText").val()])
           // console.log("# res");
           // console.log(res);
