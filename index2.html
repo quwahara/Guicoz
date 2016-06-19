@@ -103,7 +103,6 @@
             }
 
             gk.elm.room.desk.book.sheets = {}
-            gk.elm.room.desk.book.sheets.count = 0
 
             gk.elm.room.desk.book.elm.tabs({
               activate: function (e, ui) {
@@ -186,18 +185,17 @@
             }
           }
           gk.cmds.addSheet = function () {
+            var book = gk.book()
+            var bookSpec = gk.bookSpec()
             var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(gk.elm.room.desk.book.elm)
             var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></li>").uniqueId().appendTo(gk.elm.room.desk.book.tabTitles)
             var sheet = $("<div class='sheet'></div>").uniqueId().appendTo(tabContent)
             var sheetId = sheet.attr("id")
             $("#" + tabTitle.get(0).id).find("a").text(sheetId)
-            var book = gk.book()
             book.sheet = { elm: sheet, selected: null, ctrls: {} }
-            book.sheets.count += 1
             book.sheets[sheetId] = book.sheet
             book.elm.tabs("refresh")
-            book.elm.tabs({active: book.sheets.count - 1})
-            var bookSpec = gk.bookSpec()
+            book.elm.tabs({active: $("#" + bookSpec.id).find("li").length - 1})
             var sheetSpec = {
               specOf: "sheet",
               id: sheetId,
@@ -229,7 +227,6 @@
               $("#" + sheetSpec.tabTitleId).remove()
               $("#" + sheetSpec.tabContentId).remove()
               var book = gk.book()
-              book.sheets.count -= 1
               book.elm.tabs("refresh")
               delete gk.spec.all[bookId].sheets[sheetId]
               delete gk.spec.all[sheetId]
@@ -250,9 +247,8 @@
             })
             return parentId;
           }
-          gk.cmds.addCtrl = function (cmd, ctrlSpec) {
+          gk.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
             var preference = gk.bookSpec().preference
-            var sheetSpec = gk.sheetSpec()
             var nextCreationPosition = sheetSpec.nextCreationPosition
 
             ctrlSpec = ctrlSpec || {}
@@ -282,7 +278,6 @@
             gk.sheet().ctrl = { elm: ctrl }
             gk.sheet().ctrls[ctrlId] = gk.sheet().ctrl
             ctrlSpec.id = ctrlId
-            ctrlSpec.parentId = sheetSpec.id
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
             gk.spec.all[ctrlId] = ctrlSpec
@@ -334,7 +329,7 @@
           GK(["addSheet"])
         })
         $("#addCtrl").click(function () {
-          GK(["addCtrl"])
+          GK(["addCtrl", GK.sheetSpec()])
         })
         $("#download").click(function (e) {
           GK(["download"])
