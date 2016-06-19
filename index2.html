@@ -60,7 +60,7 @@
             $(".ctrl").each(function () {
               var elm = this
               $.each(gk.ctrlPersistentStyles, function (index, name) {
-                gk.spec.all[elm.id][name] = $(elm).css(name)
+                gk.allSpec[elm.id][name] = $(elm).css(name)
               })
             })
           }
@@ -73,7 +73,6 @@
             var roomId = gk.elm.room.elm.attr("id")
             gk.spec = {
               preference: $.extend(true, {}, gk.preset),
-              all: {},
               room: {
                 specOf: "room",
                 id: roomId,
@@ -81,7 +80,8 @@
                 desks: {}
               }
             }
-            gk.spec.all[roomId] = gk.spec.room
+            gk.allSpec = {}
+            gk.allSpec[roomId] = gk.spec.room
 
             gk.elm.room.desks = {}
             GK(["addDesk"])
@@ -136,16 +136,16 @@
             }
             roomSpec.selected = deskId
             roomSpec.desks[deskId] = deskSpec
-            gk.spec.all[deskId] = deskSpec
+            gk.allSpec[deskId] = deskSpec
           }
           gk.cmds.removeDesk = function (cmd, deskId) {
             deskId = deskId || (gk.desk().elm.get(0).id)
-            var roomId = gk.spec.all[deskId].parentId
+            var roomId = gk.allSpec[deskId].parentId
             if(roomId) {
               gk(["removeAllBookInDesk", deskId])
               $("#" + deskId).remove()
-              delete gk.spec.all[roomId].desks[deskId]
-              delete gk.spec.all[deskId]
+              delete gk.allSpec[roomId].desks[deskId]
+              delete gk.allSpec[deskId]
             }
           }
           gk.cmds.addBook = function () {
@@ -164,11 +164,11 @@
             }
             deskSpec.selected = bookId
             deskSpec.books[bookId] = bookSpec
-            gk.spec.all[bookId] = bookSpec
+            gk.allSpec[bookId] = bookSpec
           }
           gk.cmds.removeAllBookInDesk = function (cmd, deskId) {
             deskId = deskId || (gk.desk().elm.get(0).id)
-            var deskSpec = gk.spec.all[deskId]
+            var deskSpec = gk.allSpec[deskId]
             $.each(deskSpec.books, function (bookId) {
               gk(["removeBook", bookId])
             })
@@ -176,12 +176,12 @@
           }
           gk.cmds.removeBook = function (cmd, bookId) {
             bookId = bookId || (gk.book().elm.get(0).id)
-            var deskId = gk.spec.all[bookId].parentId
+            var deskId = gk.allSpec[bookId].parentId
             if(deskId) {
               gk(["removeAllSheetInBook", bookId])
               $("#" + bookId).remove()
-              delete gk.spec.all[deskId].books[bookId]
-              delete gk.spec.all[bookId]
+              delete gk.allSpec[deskId].books[bookId]
+              delete gk.allSpec[bookId]
             }
           }
           gk.cmds.addSheet = function () {
@@ -208,11 +208,11 @@
             }
             bookSpec.selected = sheetId
             bookSpec.sheets[sheetId] = sheetSpec
-            gk.spec.all[sheetId] = sheetSpec
+            gk.allSpec[sheetId] = sheetSpec
           }
           gk.cmds.removeAllSheetInBook = function (cmd, bookId) {
             bookId = bookId || (gk.book().elm.get(0).id)
-            var bookSpec = gk.spec.all[bookId]
+            var bookSpec = gk.allSpec[bookId]
             $.each(bookSpec.sheets, function (sheetId) {
               gk(["removeSheet", sheetId])
             })
@@ -220,21 +220,21 @@
           }
           gk.cmds.removeSheet = function (cmd, sheetId) {
             sheetId = sheetId || (gk.sheet().elm.get(0).id)
-            var bookId = gk.spec.all[sheetId].parentId
+            var bookId = gk.allSpec[sheetId].parentId
             if(bookId) {
               gk(["removeAllCtrlInSheet", sheetId])
-              var sheetSpec = gk.spec.all[sheetId]
+              var sheetSpec = gk.allSpec[sheetId]
               $("#" + sheetSpec.tabTitleId).remove()
               $("#" + sheetSpec.tabContentId).remove()
               var book = gk.book()
               book.elm.tabs("refresh")
-              delete gk.spec.all[bookId].sheets[sheetId]
-              delete gk.spec.all[sheetId]
+              delete gk.allSpec[bookId].sheets[sheetId]
+              delete gk.allSpec[sheetId]
             }
           }
           gk.cmds.findParentId = function (cmd, id) {
             var parentId = null
-            $.each(gk.spec.all, function (idInAll, spec) {
+            $.each(gk.allSpec, function (idInAll, spec) {
               if(
                 spec.specOf === "sheet" && (id in spec.ctrls)
                 || spec.specOf === "book" && (id in spec.sheets)
@@ -280,21 +280,21 @@
             ctrlSpec.id = ctrlId
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
-            gk.spec.all[ctrlId] = ctrlSpec
+            gk.allSpec[ctrlId] = ctrlSpec
           }
           gk.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
             sheetId = sheetId || (gk.sheet().elm.get(0).id)
-            var sheetSpec = gk.spec.all[sheetId]
+            var sheetSpec = gk.allSpec[sheetId]
             $.each(sheetSpec.ctrls, function (ctrlId) {
               gk(["removeCtrl", ctrlId])
             })
             sheetSpec.selected = null
           }
           gk.cmds.removeCtrl = function (cmd, ctrlId) {
-            var sheetId = gk.spec.all[ctrlId].parentId
+            var sheetId = gk.allSpec[ctrlId].parentId
             if(sheetId) {
-              delete gk.spec.all[sheetId].ctrls[ctrlId]
-              delete gk.spec.all[ctrlId]
+              delete gk.allSpec[sheetId].ctrls[ctrlId]
+              delete gk.allSpec[ctrlId]
               $("#" + ctrlId).remove()
               console.debug("Removed #" + ctrlId + " in sheet #" + sheetId)
             }
