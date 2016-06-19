@@ -10,15 +10,8 @@
     .ui-tabs { height: 100%; width: 100%; overflow: scroll; }
     .ui-tabs .ui-tabs-panel { overflow: scroll; }
     .sheet { width: 2000px; height: 2000px; background-image: url('grid100.png'); }
-    /*
-    .ui-tabs { margin: 0; padding: 0; border: 0; }
-    .ui-tabs .ui-tabs-nav { margin: 0; padding: 0; border: 0; }
-    .ui-tabs .ui-tabs-panel { margin: 0; padding: 0; border: 0; }
-    .sheet { margin: 0; padding: 0; border: 0; }
-    .ctrl { position:absolute; margin: 0; padding: 0; border: 0; }
-    */
     .sheet { position: relative; }
-    .ctrl { position:absolute; }
+    .ctrl { position: absolute; }
     </style>
     <script>
     var GK
@@ -31,8 +24,8 @@
           gk.ctrlPersistentStyles = ["left", "top", "width", "height"]
           gk.preset = {
             nextCreationPosition: {
-              left: 240,
-              top: 120
+              left: 100,
+              top: 100
             },
             creationPositionIncrements: {
               left: 10,
@@ -40,8 +33,8 @@
             },
             ctrls: {
               ctrl: {
-                width: 120,
-                height: 120
+                width: 100,
+                height: 100
               }
             }
           }
@@ -140,7 +133,7 @@
               delete gk.allSpec[deskId]
             }
           }
-          gk.cmds.addBook = function (cmd, deskSpec) {
+          gk.cmds.addBook = function (cmd, deskSpec, bookSpec) {
             var desk = gk.allElm[deskSpec.id]
             var book = $("<div class='book'><ul></ul></div>").uniqueId().appendTo(desk.elm)
             book.tabs({
@@ -158,11 +151,14 @@
               parentId: deskSpec.id,
               preference: $.extend(true, {}, gk.spec.preference),
               selected: null,
-              sheets: {}
+              sheets: (bookSpec && bookSpec.sheets) || {}
             }
             deskSpec.selected = bookId
             deskSpec.books[bookId] = bookSpec
             gk.allSpec[bookId] = bookSpec
+            $.each(bookSpec.sheets, function (id, sheetSpec) {
+              gk(["addSheet", bookSpec, sheetSpec])
+            })
           }
           gk.cmds.removeAllBookInDesk = function (cmd, deskId) {
             deskId = deskId || (gk.desk().elm.get(0).id)
@@ -182,7 +178,7 @@
               delete gk.allSpec[bookId]
             }
           }
-          gk.cmds.addSheet = function (cmd, bookSpec) {
+          gk.cmds.addSheet = function (cmd, bookSpec, sheetSpec) {
             var book = gk.allElm[bookSpec.id]
             var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(book.elm)
             var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></li>").uniqueId().appendTo(book.tabTitles)
@@ -194,19 +190,23 @@
             gk.allElm[sheetId] = book.sheet
             book.elm.tabs("refresh")
             book.elm.tabs({active: $("#" + bookSpec.id).find("li").length - 1})
-            var sheetSpec = {
+            sheetSpec = {
               specOf: "sheet",
               id: sheetId,
               parentId: bookSpec.id,
               tabTitleId: tabTitle.get(0).id,
               tabContentId: tabContent.get(0).id,
-              nextCreationPosition: $.extend(true, {}, bookSpec.preference.nextCreationPosition),
+              nextCreationPosition: (sheetSpec && sheetSpec.nextCreationPosition) || $.extend(true, {}, bookSpec.preference.nextCreationPosition),
               selected: null,
-              ctrls: {}
+              ctrls: (sheetSpec && sheetSpec.ctrls) || {}
             }
             bookSpec.selected = sheetId
             bookSpec.sheets[sheetId] = sheetSpec
             gk.allSpec[sheetId] = sheetSpec
+            $.each(sheetSpec.ctrls, function (id, ctrlSpec) {
+              gk(["addCtrl", sheetSpec, ctrlSpec])
+            })
+            return sheetId;
           }
           gk.cmds.removeAllSheetInBook = function (cmd, bookId) {
             bookId = bookId || (gk.book().elm.get(0).id)
@@ -264,7 +264,7 @@
 
             var ctrl = $("<div class='ctrl ui-widget-content'></div>")
             .appendTo(sheet.elm)
-            .draggable({grid:[1,1]})
+            .draggable({grid:[10,10]})
             .css("left", ctrlSpec.left).css("top", ctrlSpec.top)
             .width(ctrlSpec.width).height(ctrlSpec.height)
             .uniqueId()
@@ -300,10 +300,10 @@
           }
           gk.cmds.download = function (e) {
             gk.utils.applyAllElmPosToCtrl()
-            var d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GK.spec.room))
+            var d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GK.bookSpec()))
             var a = document.createElement('a')
             a.setAttribute("href", d)
-            a.setAttribute("download", "data.json")
+            a.setAttribute("download", "book.json")
             a.click()
           }
           return gk;
@@ -343,23 +343,19 @@
           GK(["download"])
         })
         function handleFileSelect(evt) {
-          var files = evt.target.files; // FileList object
-          // console.log(files);
+          var files = evt.target.files;
           if(files.length < 1) { return; }
-
           var reader = new FileReader();
           reader.onload = function (e) {
-            // console.log(reader.result);
+            var bookSpec
             try {
-              var ctrls = JSON.parse(reader.result)
-              console.log(ctrls);
-              // $.each(ctrls, function (id, ctrl) {
-              //   // console.log(id, ctrl);
-              //   GK(["createPanel", ctrl])
-              // })
+              bookSpec = JSON.parse(reader.result)
+              console.debug(bookSpec);
             } catch (e) {
               console.error(e);
             }
+            GK(["removeBook", GK.bookSpec().id])
+            GK(["addBook", GK.deskSpec(), bookSpec])
           }
           reader.readAsText(files[0]);
         }
