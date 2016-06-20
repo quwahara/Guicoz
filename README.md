@@ -1,6 +1,6 @@
-# Guikoz
+# Guicoz
 
-Guikoz is a html mock designer.
+Guicoz is a html mock designer.
 
 ## License
 
