@@ -1,4 +1,4 @@
-# guikoz
+# Guikoz
 
 Guikoz is a html mock designer.
 
