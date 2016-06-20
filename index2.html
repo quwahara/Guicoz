@@ -12,6 +12,8 @@
     .sheet { width: 2000px; height: 2000px; background-image: url('grid100.png'); }
     .sheet { position: relative; }
     .ctrl { position: absolute; }
+    .ctrl input { margin: 4px; }
+    .ctrl input { font-size: 12px; }
     </style>
     <script>
     var GK
@@ -280,6 +282,7 @@
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
             gk.allSpec[ctrlId] = ctrlSpec
+            return ctrlId;
           }
           gk.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
             sheetId = sheetId || (gk.sheet().elm.get(0).id)
@@ -297,6 +300,17 @@
               $("#" + ctrlId).remove()
               console.debug("Removed #" + ctrlId + " in sheet #" + sheetId)
             }
+          }
+          gk.cmds.addInputText = function (cmd, sheetSpec, ctrlSpec) {
+            var ctrlId = gk.cmds.addCtrl(cmd, sheetSpec, ctrlSpec)
+            console.log(ctrlId);
+            var margin = 4, border = 2, padding = 1
+            var wrap = (margin + border + padding) * 2
+            var $ctrl = $("#" + ctrlId)
+            var $input = $ctrl.html("<input type='text'></input>").find("input")
+            $input.width($ctrl.width() - wrap)
+            $ctrl.height($input.height() + wrap)
+            $input.val(ctrlId)
           }
           gk.cmds.download = function (e) {
             gk.utils.applyAllElmPosToCtrl()
@@ -323,6 +337,9 @@
           // var res = GK(["findParentId", $("#testText").val()])
           // console.log("# res");
           // console.log(res);
+        })
+        $("#addInputText").click(function () {
+          GK(["addInputText", GK.sheetSpec()])
         })
         $("#addBook").click(function () {
           GK(["addBook", GK.deskSpec()])
@@ -364,6 +381,7 @@
     </script>
 </head>
 <body>
+  <button id="addInputText">Add input text</button>
   <button id="addBook">Add book</button>
   <button id="removeBook">Remove book</button>
   <button id="addSheet">Add sheet</button>
