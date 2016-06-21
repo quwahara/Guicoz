@@ -264,7 +264,7 @@
               nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
             }
 
-            var ctrl = $("<div class='ctrl ui-widget-content'></div>")
+            var $ctrl = $("<div class='ctrl ui-widget-content'></div>")
             .appendTo(sheet.elm)
             .draggable({grid:[10,10]})
             .css("left", ctrlSpec.left).css("top", ctrlSpec.top)
@@ -273,15 +273,21 @@
             .on("click", function (e) {
               console.log(this.id);
             })
-            var ctrlId = ctrl.get(0).id
-            ctrl.text(ctrlId)
-            sheet.ctrl = { elm: ctrl }
+            var ctrlId = $ctrl.get(0).id
+            $ctrl.text(ctrlId)
+            sheet.ctrl = { elm: $ctrl }
             sheet.ctrls[ctrlId] = sheet.ctrl
             gk.allElm[ctrlId] = sheet.ctrl
             ctrlSpec.id = ctrlId
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
             gk.allSpec[ctrlId] = ctrlSpec
+            if(ctrlSpec.input) {
+              var $input = $ctrl.html("<input type='" + ctrlSpec.input.type + "'></input>").find("input")
+              $input.width($ctrl.width() - ($input.outerWidth(true) - $input.width()))
+              $ctrl.height($input.outerHeight(true))
+              $input.val(ctrlId)
+            }
             return ctrlId;
           }
           gk.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
@@ -300,14 +306,6 @@
               $("#" + ctrlId).remove()
               console.debug("Removed #" + ctrlId + " in sheet #" + sheetId)
             }
-          }
-          gk.cmds.addInputText = function (cmd, sheetSpec, ctrlSpec) {
-            var ctrlId = gk.cmds.addCtrl(cmd, sheetSpec, ctrlSpec)
-            var $ctrl = $("#" + ctrlId)
-            var $input = $ctrl.html("<input type='text'></input>").find("input")
-            $input.width($ctrl.width() - ($input.outerWidth(true) - $input.width()))
-            $ctrl.height($input.outerHeight(true))
-            $input.val(ctrlId)
           }
           gk.cmds.download = function (e) {
             gk.utils.applyAllElmPosToCtrl()
@@ -336,7 +334,7 @@
           // console.log(res);
         })
         $("#addInputText").click(function () {
-          GK(["addInputText", GK.sheetSpec()])
+          GK(["addCtrl", GK.sheetSpec(), {input: {type: "text"}}])
         })
         $("#addBook").click(function () {
           GK(["addBook", GK.deskSpec()])
@@ -379,11 +377,11 @@
 </head>
 <body>
   <button id="addInputText">Add input text</button>
-  <button id="addBook">Add book</button>
-  <button id="removeBook">Remove book</button>
+  <!-- <button id="addBook">Add book</button>
+  <button id="removeBook">Remove book</button> -->
   <button id="addSheet">Add sheet</button>
   <button id="removeSheet">Remove sheet</button>
-  <button id="addCtrl">Add ctrl</button>
+  <!-- <button id="addCtrl">Add ctrl</button> -->
   <button id="download">Download</button>
   <input id="files" type="file" name="files[]" />
   <input id="testText" type="text" />
