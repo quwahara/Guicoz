@@ -303,13 +303,10 @@
           }
           gk.cmds.addInputText = function (cmd, sheetSpec, ctrlSpec) {
             var ctrlId = gk.cmds.addCtrl(cmd, sheetSpec, ctrlSpec)
-            console.log(ctrlId);
-            var margin = 4, border = 2, padding = 1
-            var wrap = (margin + border + padding) * 2
             var $ctrl = $("#" + ctrlId)
             var $input = $ctrl.html("<input type='text'></input>").find("input")
-            $input.width($ctrl.width() - wrap)
-            $ctrl.height($input.height() + wrap)
+            $input.width($ctrl.width() - ($input.outerWidth(true) - $input.width()))
+            $ctrl.height($input.outerHeight(true))
             $input.val(ctrlId)
           }
           gk.cmds.download = function (e) {
