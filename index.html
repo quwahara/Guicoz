@@ -247,6 +247,10 @@
             })
             return parentId;
           }
+          gk.utils.fitInput = function ($ctrl, $input) {
+            $input.width($ctrl.width() - ($input.outerWidth(true) - $input.width()))
+            $ctrl.height($input.outerHeight(true))
+          }
           gk.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
             var preference = gk.bookSpec().preference
             var sheet = gk.allElm[sheetSpec.id]
@@ -281,14 +285,19 @@
             gk.allSpec[ctrlId] = ctrlSpec
             if(ctrlSpec.input) {
               var $input = $ctrl.html("<input type='" + ctrlSpec.input.type + "'></input>").find("input")
-              $input.width($ctrl.width() - ($input.outerWidth(true) - $input.width()))
-              $ctrl.height($input.outerHeight(true))
               $input.val(ctrlId)
+              gk.utils.fitInput($ctrl, $input)
             }
-            // The ui.resizable have to be applied after elements creation.
-            // It won't work unless to do so.
             $ctrl
-            .resizable()
+            .resizable({
+              containment: sheet.elm,
+              grid: [10,10],
+              handles: "e",
+              minWidth: 50,
+              resize: function (event, ui) {
+                gk.utils.fitInput($ctrl, $input)
+              }
+            })
             .draggable({grid:[10,10]})
             return ctrlId;
           }
