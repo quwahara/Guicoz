@@ -16,15 +16,15 @@
     .ctrl input { font-size: 12px; }
     </style>
     <script>
-    var GK
+    var GCZ
     $(function() {
-        GK = (function () {
-          var gk = function (cmd) {
+        GCZ = (function () {
+          var gcz = function (cmd) {
             var self = this
-            return GK.cmds[cmd[0]].apply(GK, cmd);
+            return GCZ.cmds[cmd[0]].apply(GCZ, cmd);
           }
-          gk.ctrlPersistentStyles = ["left", "top", "width", "height"]
-          gk.preset = {
+          gcz.ctrlPersistentStyles = ["left", "top", "width", "height"]
+          gcz.preset = {
             nextCreationPosition: {
               left: 100,
               top: 100
@@ -40,36 +40,36 @@
               }
             }
           }
-          gk.utils = {}
-          gk.utils.uiPosition = function (position) {
+          gcz.utils = {}
+          gcz.utils.uiPosition = function (position) {
             return "left+" + position.left + " top+" + position.top;
           }
-          gk.utils.positionInSheet = function (position) {
-            var sheetOffset = gk.sheet().elm.offset()
+          gcz.utils.positionInSheet = function (position) {
+            var sheetOffset = gcz.sheet().elm.offset()
             return { top: position.top - sheetOffset.top, left: position.left - sheetOffset.left };
           }
-          gk.utils.elmPosInSheet = function (elm) {
-            return gk.utils.positionInSheet($(elm).position());
+          gcz.utils.elmPosInSheet = function (elm) {
+            return gcz.utils.positionInSheet($(elm).position());
           }
-          gk.utils.applyAllElmPosToCtrl = function () {
+          gcz.utils.applyAllElmPosToCtrl = function () {
             $(".ctrl").each(function () {
               var elm = this
-              $.each(gk.ctrlPersistentStyles, function (index, name) {
-                gk.allSpec[elm.id][name] = $(elm).css(name)
+              $.each(gcz.ctrlPersistentStyles, function (index, name) {
+                gcz.allSpec[elm.id][name] = $(elm).css(name)
               })
             })
           }
-          gk.init = function () {
+          gcz.init = function () {
 
-            gk.elm = { room: { elm: $("<div class='room'></div>").uniqueId().appendTo("body") } }
-            gk.room = function () {
-              return gk.elm.room;
+            gcz.elm = { room: { elm: $("<div class='room'></div>").uniqueId().appendTo("body") } }
+            gcz.room = function () {
+              return gcz.elm.room;
             }
-            gk.allElm = {}
-            var roomId = gk.elm.room.elm.attr("id")
-            gk.allElm[roomId] = gk.elm.room
-            gk.spec = {
-              preference: $.extend(true, {}, gk.preset),
+            gcz.allElm = {}
+            var roomId = gcz.elm.room.elm.attr("id")
+            gcz.allElm[roomId] = gcz.elm.room
+            gcz.spec = {
+              preference: $.extend(true, {}, gcz.preset),
               room: {
                 specOf: "room",
                 id: roomId,
@@ -77,38 +77,38 @@
                 desks: {}
               }
             }
-            gk.allSpec = {}
-            gk.allSpec[roomId] = gk.spec.room
+            gcz.allSpec = {}
+            gcz.allSpec[roomId] = gcz.spec.room
 
-            gk.elm.room.desks = {}
-            gk(["addDesk", gk.spec.room])
-            gk.deskSpec = function () {
-              return gk.spec.room.desks[gk.spec.room.selected];
+            gcz.elm.room.desks = {}
+            gcz(["addDesk", gcz.spec.room])
+            gcz.deskSpec = function () {
+              return gcz.spec.room.desks[gcz.spec.room.selected];
             }
-            gk.desk = function () {
-              return gk.allElm[gk.deskSpec().id]
+            gcz.desk = function () {
+              return gcz.allElm[gcz.deskSpec().id]
             }
-            gk.elm.room.desk.books = {}
-            gk(["addBook", gk.deskSpec()])
-            gk.bookSpec = function () {
-              var deskSpec = gk.deskSpec()
+            gcz.elm.room.desk.books = {}
+            gcz(["addBook", gcz.deskSpec()])
+            gcz.bookSpec = function () {
+              var deskSpec = gcz.deskSpec()
               return deskSpec.books[deskSpec.selected];
             }
-            gk.book = function () {
-              return gk.allElm[gk.bookSpec().id]
+            gcz.book = function () {
+              return gcz.allElm[gcz.bookSpec().id]
             }
-            gk(["addSheet", gk.bookSpec()])
-            gk.sheetSpec = function () {
-              var bookSpec = gk.bookSpec()
+            gcz(["addSheet", gcz.bookSpec()])
+            gcz.sheetSpec = function () {
+              var bookSpec = gcz.bookSpec()
               return bookSpec.sheets[bookSpec.selected];
             }
-            gk.sheet = function () {
-              return gk.allElm[gk.sheetSpec().id]
+            gcz.sheet = function () {
+              return gcz.allElm[gcz.sheetSpec().id]
             }
           }
-          gk.cmds = {}
-          gk.cmds.addDesk = function (cmd, roomSpec) {
-            var room = gk.allElm[roomSpec.id]
+          gcz.cmds = {}
+          gcz.cmds.addDesk = function (cmd, roomSpec) {
+            var room = gcz.allElm[roomSpec.id]
             var desk = $("<div class='desk'></div>").uniqueId().appendTo(room.elm)
             var deskId = desk.attr("id")
             room.desk = { elm: desk }
@@ -120,68 +120,68 @@
               selected: null,
               books: {}
             }
-            gk.allElm[deskId] = room.desk
+            gcz.allElm[deskId] = room.desk
             roomSpec.selected = deskId
             roomSpec.desks[deskId] = deskSpec
-            gk.allSpec[deskId] = deskSpec
+            gcz.allSpec[deskId] = deskSpec
           }
-          gk.cmds.removeDesk = function (cmd, deskId) {
-            deskId = deskId || (gk.desk().elm.get(0).id)
-            var roomId = gk.allSpec[deskId].parentId
+          gcz.cmds.removeDesk = function (cmd, deskId) {
+            deskId = deskId || (gcz.desk().elm.get(0).id)
+            var roomId = gcz.allSpec[deskId].parentId
             if(roomId) {
-              gk(["removeAllBookInDesk", deskId])
+              gcz(["removeAllBookInDesk", deskId])
               $("#" + deskId).remove()
-              delete gk.allSpec[roomId].desks[deskId]
-              delete gk.allSpec[deskId]
+              delete gcz.allSpec[roomId].desks[deskId]
+              delete gcz.allSpec[deskId]
             }
           }
-          gk.cmds.addBook = function (cmd, deskSpec, bookSpec) {
-            var desk = gk.allElm[deskSpec.id]
+          gcz.cmds.addBook = function (cmd, deskSpec, bookSpec) {
+            var desk = gcz.allElm[deskSpec.id]
             var book = $("<div class='book'><ul></ul></div>").uniqueId().appendTo(desk.elm)
             book.tabs({
               activate: function (e, ui) {
-                gk.bookSpec().selected = $("#" + ui.newPanel.get(0).id).find(".sheet").get(0).id
+                gcz.bookSpec().selected = $("#" + ui.newPanel.get(0).id).find(".sheet").get(0).id
               }
             })
             var bookId = book.attr("id")
             desk.book = { elm: book, tabTitles: book.find("ul"), sheets: {} }
             desk.books[bookId] = desk.book
-            gk.allElm[bookId] = desk.book
+            gcz.allElm[bookId] = desk.book
             var bookSpec = {
               specOf: "book",
               id: bookId,
               parentId: deskSpec.id,
-              preference: $.extend(true, {}, gk.spec.preference),
+              preference: $.extend(true, {}, gcz.spec.preference),
               selected: null,
               sheets: (bookSpec && bookSpec.sheets) || {}
             }
             deskSpec.selected = bookId
             deskSpec.books[bookId] = bookSpec
-            gk.allSpec[bookId] = bookSpec
+            gcz.allSpec[bookId] = bookSpec
             $.each(bookSpec.sheets, function (id, sheetSpec) {
-              gk(["addSheet", bookSpec, sheetSpec])
+              gcz(["addSheet", bookSpec, sheetSpec])
             })
           }
-          gk.cmds.removeAllBookInDesk = function (cmd, deskId) {
-            deskId = deskId || (gk.desk().elm.get(0).id)
-            var deskSpec = gk.allSpec[deskId]
+          gcz.cmds.removeAllBookInDesk = function (cmd, deskId) {
+            deskId = deskId || (gcz.desk().elm.get(0).id)
+            var deskSpec = gcz.allSpec[deskId]
             $.each(deskSpec.books, function (bookId) {
-              gk(["removeBook", bookId])
+              gcz(["removeBook", bookId])
             })
             deskSpec.selected = null
           }
-          gk.cmds.removeBook = function (cmd, bookId) {
-            bookId = bookId || (gk.book().elm.get(0).id)
-            var deskId = gk.allSpec[bookId].parentId
+          gcz.cmds.removeBook = function (cmd, bookId) {
+            bookId = bookId || (gcz.book().elm.get(0).id)
+            var deskId = gcz.allSpec[bookId].parentId
             if(deskId) {
-              gk(["removeAllSheetInBook", bookId])
+              gcz(["removeAllSheetInBook", bookId])
               $("#" + bookId).remove()
-              delete gk.allSpec[deskId].books[bookId]
-              delete gk.allSpec[bookId]
+              delete gcz.allSpec[deskId].books[bookId]
+              delete gcz.allSpec[bookId]
             }
           }
-          gk.cmds.addSheet = function (cmd, bookSpec, sheetSpec) {
-            var book = gk.allElm[bookSpec.id]
+          gcz.cmds.addSheet = function (cmd, bookSpec, sheetSpec) {
+            var book = gcz.allElm[bookSpec.id]
             var tabContent = $("<div class='tab-content'></div>").uniqueId().appendTo(book.elm)
             var tabTitle = $("<li><a href='#" + tabContent.attr("id") + "'></a></li>").uniqueId().appendTo(book.tabTitles)
             var sheet = $("<div class='sheet'></div>").uniqueId().appendTo(tabContent)
@@ -189,7 +189,7 @@
             $("#" + tabTitle.get(0).id).find("a").text(sheetId)
             book.sheet = { elm: sheet, selected: null, ctrls: {} }
             book.sheets[sheetId] = book.sheet
-            gk.allElm[sheetId] = book.sheet
+            gcz.allElm[sheetId] = book.sheet
             book.elm.tabs("refresh")
             book.elm.tabs({active: $("#" + bookSpec.id).find("li").length - 1})
             sheetSpec = {
@@ -204,37 +204,37 @@
             }
             bookSpec.selected = sheetId
             bookSpec.sheets[sheetId] = sheetSpec
-            gk.allSpec[sheetId] = sheetSpec
+            gcz.allSpec[sheetId] = sheetSpec
             $.each(sheetSpec.ctrls, function (id, ctrlSpec) {
-              gk(["addCtrl", sheetSpec, ctrlSpec])
+              gcz(["addCtrl", sheetSpec, ctrlSpec])
             })
             return sheetId;
           }
-          gk.cmds.removeAllSheetInBook = function (cmd, bookId) {
-            bookId = bookId || (gk.book().elm.get(0).id)
-            var bookSpec = gk.allSpec[bookId]
+          gcz.cmds.removeAllSheetInBook = function (cmd, bookId) {
+            bookId = bookId || (gcz.book().elm.get(0).id)
+            var bookSpec = gcz.allSpec[bookId]
             $.each(bookSpec.sheets, function (sheetId) {
-              gk(["removeSheet", sheetId])
+              gcz(["removeSheet", sheetId])
             })
             bookSpec.selected = null
           }
-          gk.cmds.removeSheet = function (cmd, sheetId) {
-            sheetId = sheetId || (gk.sheet().elm.get(0).id)
-            var bookId = gk.allSpec[sheetId].parentId
+          gcz.cmds.removeSheet = function (cmd, sheetId) {
+            sheetId = sheetId || (gcz.sheet().elm.get(0).id)
+            var bookId = gcz.allSpec[sheetId].parentId
             if(bookId) {
-              gk(["removeAllCtrlInSheet", sheetId])
-              var sheetSpec = gk.allSpec[sheetId]
+              gcz(["removeAllCtrlInSheet", sheetId])
+              var sheetSpec = gcz.allSpec[sheetId]
               $("#" + sheetSpec.tabTitleId).remove()
               $("#" + sheetSpec.tabContentId).remove()
-              var book = gk.book()
+              var book = gcz.book()
               book.elm.tabs("refresh")
-              delete gk.allSpec[bookId].sheets[sheetId]
-              delete gk.allSpec[sheetId]
+              delete gcz.allSpec[bookId].sheets[sheetId]
+              delete gcz.allSpec[sheetId]
             }
           }
-          gk.cmds.findParentId = function (cmd, id) {
+          gcz.cmds.findParentId = function (cmd, id) {
             var parentId = null
-            $.each(gk.allSpec, function (idInAll, spec) {
+            $.each(gcz.allSpec, function (idInAll, spec) {
               if(
                 spec.specOf === "sheet" && (id in spec.ctrls)
                 || spec.specOf === "book" && (id in spec.sheets)
@@ -247,13 +247,13 @@
             })
             return parentId;
           }
-          gk.utils.fitInput = function ($ctrl, $input) {
+          gcz.utils.fitInput = function ($ctrl, $input) {
             $input.width($ctrl.width() - ($input.outerWidth(true) - $input.width()))
             $ctrl.height($input.outerHeight(true))
           }
-          gk.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
-            var preference = gk.bookSpec().preference
-            var sheet = gk.allElm[sheetSpec.id]
+          gcz.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
+            var preference = gcz.bookSpec().preference
+            var sheet = gcz.allElm[sheetSpec.id]
             var nextCreationPosition = sheetSpec.nextCreationPosition
             ctrlSpec = ctrlSpec || {}
             ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
@@ -264,8 +264,8 @@
             if(ctrlSpec.left === undefined || ctrlSpec.top === undefined) {
               ctrlSpec.left = nextCreationPosition.left
               ctrlSpec.top = nextCreationPosition.top
-              nextCreationPosition.left += gk.spec.preference.creationPositionIncrements.left
-              nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
+              nextCreationPosition.left += gcz.spec.preference.creationPositionIncrements.left
+              nextCreationPosition.top += gcz.spec.preference.creationPositionIncrements.top
             }
             var $ctrl = $("<div class='ctrl ui-widget-content'></div>")
             .appendTo(sheet.elm)
@@ -278,15 +278,15 @@
             var ctrlId = $ctrl.get(0).id
             sheet.ctrl = { elm: $ctrl }
             sheet.ctrls[ctrlId] = sheet.ctrl
-            gk.allElm[ctrlId] = sheet.ctrl
+            gcz.allElm[ctrlId] = sheet.ctrl
             ctrlSpec.id = ctrlId
             sheetSpec.selected = ctrlId
             sheetSpec.ctrls[ctrlId] = ctrlSpec
-            gk.allSpec[ctrlId] = ctrlSpec
+            gcz.allSpec[ctrlId] = ctrlSpec
             if(ctrlSpec.input) {
               var $input = $ctrl.html("<input type='" + ctrlSpec.input.type + "'></input>").find("input")
               $input.val(ctrlId)
-              gk.utils.fitInput($ctrl, $input)
+              gcz.utils.fitInput($ctrl, $input)
             }
             $ctrl
             .resizable({
@@ -295,75 +295,75 @@
               handles: "e",
               minWidth: 50,
               resize: function (event, ui) {
-                gk.utils.fitInput($ctrl, $input)
+                gcz.utils.fitInput($ctrl, $input)
               }
             })
             .draggable({grid:[10,10]})
             return ctrlId;
           }
-          gk.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
-            sheetId = sheetId || (gk.sheet().elm.get(0).id)
-            var sheetSpec = gk.allSpec[sheetId]
+          gcz.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
+            sheetId = sheetId || (gcz.sheet().elm.get(0).id)
+            var sheetSpec = gcz.allSpec[sheetId]
             $.each(sheetSpec.ctrls, function (ctrlId) {
-              gk(["removeCtrl", ctrlId])
+              gcz(["removeCtrl", ctrlId])
             })
             sheetSpec.selected = null
           }
-          gk.cmds.removeCtrl = function (cmd, ctrlId) {
-            var sheetId = gk.allSpec[ctrlId].parentId
+          gcz.cmds.removeCtrl = function (cmd, ctrlId) {
+            var sheetId = gcz.allSpec[ctrlId].parentId
             if(sheetId) {
-              delete gk.allSpec[sheetId].ctrls[ctrlId]
-              delete gk.allSpec[ctrlId]
+              delete gcz.allSpec[sheetId].ctrls[ctrlId]
+              delete gcz.allSpec[ctrlId]
               $("#" + ctrlId).remove()
               console.debug("Removed #" + ctrlId + " in sheet #" + sheetId)
             }
           }
-          gk.cmds.download = function (e) {
-            gk.utils.applyAllElmPosToCtrl()
-            var d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GK.bookSpec()))
+          gcz.cmds.download = function (e) {
+            gcz.utils.applyAllElmPosToCtrl()
+            var d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GCZ.bookSpec()))
             var a = document.createElement('a')
             a.setAttribute("href", d)
             a.setAttribute("download", "book.json")
             a.click()
           }
-          return gk;
+          return gcz;
         })()
-        GK.init()
-        console.log(GK.spec);
+        GCZ.init()
+        console.log(GCZ.spec);
         $("#testFlightButton").click(function () {
           var arg1 = $("#testText").val()
-          GK(["removeDesk", arg1])
-          // GK(["removeAllBookInDesk", arg1])
-          // GK(["removeBook", arg1])
-          // GK(["removeAllSheetInBook", arg1])
-          // GK(["findSheetHavingCtrl"])
-          // GK(["removeSheet"], arg1)
-          // GK(["removeAllCtrlInSheet"], arg1)
-          // GK(["removeCtrl", arg1])
-          // var res = GK(["findParentId", $("#testText").val()])
+          GCZ(["removeDesk", arg1])
+          // GCZ(["removeAllBookInDesk", arg1])
+          // GCZ(["removeBook", arg1])
+          // GCZ(["removeAllSheetInBook", arg1])
+          // GCZ(["findSheetHavingCtrl"])
+          // GCZ(["removeSheet"], arg1)
+          // GCZ(["removeAllCtrlInSheet"], arg1)
+          // GCZ(["removeCtrl", arg1])
+          // var res = GCZ(["findParentId", $("#testText").val()])
           // console.log("# res");
           // console.log(res);
         })
         $("#addInputText").click(function () {
-          GK(["addCtrl", GK.sheetSpec(), {input: {type: "text"}}])
+          GCZ(["addCtrl", GCZ.sheetSpec(), {input: {type: "text"}}])
         })
         $("#addBook").click(function () {
-          GK(["addBook", GK.deskSpec()])
+          GCZ(["addBook", GCZ.deskSpec()])
         })
         $("#removeBook").click(function () {
-          GK(["removeBook", GK.bookSpec().id])
+          GCZ(["removeBook", GCZ.bookSpec().id])
         })
         $("#addSheet").click(function () {
-          GK(["addSheet", GK.bookSpec()])
+          GCZ(["addSheet", GCZ.bookSpec()])
         })
         $("#removeSheet").click(function () {
-          GK(["removeSheet", GK.sheetSpec().id])
+          GCZ(["removeSheet", GCZ.sheetSpec().id])
         })
         $("#addCtrl").click(function () {
-          GK(["addCtrl", GK.sheetSpec()])
+          GCZ(["addCtrl", GCZ.sheetSpec()])
         })
         $("#download").click(function (e) {
-          GK(["download"])
+          GCZ(["download"])
         })
         function handleFileSelect(evt) {
           var files = evt.target.files;
@@ -377,8 +377,8 @@
             } catch (e) {
               console.error(e);
             }
-            GK(["removeBook", GK.bookSpec().id])
-            GK(["addBook", GK.deskSpec(), bookSpec])
+            GCZ(["removeBook", GCZ.bookSpec().id])
+            GCZ(["addBook", GCZ.deskSpec(), bookSpec])
           }
           reader.readAsText(files[0]);
         }
