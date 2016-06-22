@@ -263,10 +263,8 @@
               nextCreationPosition.left += gk.spec.preference.creationPositionIncrements.left
               nextCreationPosition.top += gk.spec.preference.creationPositionIncrements.top
             }
-
             var $ctrl = $("<div class='ctrl ui-widget-content'></div>")
             .appendTo(sheet.elm)
-            .draggable({grid:[10,10]})
             .css("left", ctrlSpec.left).css("top", ctrlSpec.top)
             .width(ctrlSpec.width).height(ctrlSpec.height)
             .uniqueId()
@@ -274,7 +272,6 @@
               console.log(this.id);
             })
             var ctrlId = $ctrl.get(0).id
-            $ctrl.text(ctrlId)
             sheet.ctrl = { elm: $ctrl }
             sheet.ctrls[ctrlId] = sheet.ctrl
             gk.allElm[ctrlId] = sheet.ctrl
@@ -288,6 +285,11 @@
               $ctrl.height($input.outerHeight(true))
               $input.val(ctrlId)
             }
+            // The ui.resizable have to be applied after elements creation.
+            // It won't work unless to do so.
+            $ctrl
+            .resizable()
+            .draggable({grid:[10,10]})
             return ctrlId;
           }
           gk.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
