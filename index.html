@@ -344,28 +344,38 @@
           // console.log("# res");
           // console.log(res);
         })
-        $("#addInputText").click(function () {
+        var at = $("body > div")
+        $("<button>text</button>").appendTo(at)
+        .click(function () {
           GCZ(["addCtrl", GCZ.sheetSpec(), {input: {type: "text"}}])
         })
-        $("#addBook").click(function () {
-          GCZ(["addBook", GCZ.deskSpec()])
+        $("<button>button</button>").appendTo(at)
+        .click(function () {
+          GCZ(["addCtrl", GCZ.sheetSpec(), {input: {type: "button"}}])
         })
-        $("#removeBook").click(function () {
-          GCZ(["removeBook", GCZ.bookSpec().id])
+        $("<button>checkbox</button>").appendTo(at)
+        .click(function () {
+          GCZ(["addCtrl", GCZ.sheetSpec(), {input: {type: "checkbox"}}])
         })
-        $("#addSheet").click(function () {
+        $("<button>radio</button>").appendTo(at)
+        .click(function () {
+          GCZ(["addCtrl", GCZ.sheetSpec(), {input: {type: "radio"}}])
+        })
+        $("<button>Add sheet</button>").appendTo(at)
+        .click(function () {
           GCZ(["addSheet", GCZ.bookSpec()])
         })
-        $("#removeSheet").click(function () {
+        $("<button>Remove sheet</button>").appendTo(at)
+        .click(function () {
           GCZ(["removeSheet", GCZ.sheetSpec().id])
         })
-        $("#addCtrl").click(function () {
-          GCZ(["addCtrl", GCZ.sheetSpec()])
-        })
-        $("#download").click(function (e) {
+
+        $("<button>Download</button>").appendTo(at)
+        .click(function () {
           GCZ(["download"])
         })
-        function handleFileSelect(evt) {
+        $("<input type='file' name='files[]' />").appendTo(at)
+        .on("change", function (evt) {
           var files = evt.target.files;
           if(files.length < 1) { return; }
           var reader = new FileReader();
@@ -381,20 +391,12 @@
             GCZ(["addBook", GCZ.deskSpec(), bookSpec])
           }
           reader.readAsText(files[0]);
-        }
-        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+        })
     });
     </script>
 </head>
 <body>
-  <button id="addInputText">Add input text</button>
-  <!-- <button id="addBook">Add book</button>
-  <button id="removeBook">Remove book</button> -->
-  <button id="addSheet">Add sheet</button>
-  <button id="removeSheet">Remove sheet</button>
-  <!-- <button id="addCtrl">Add ctrl</button> -->
-  <button id="download">Download</button>
-  <input id="files" type="file" name="files[]" />
+  <div></div>
   <input id="testText" type="text" />
   <button id="testFlightButton">Test Flight</button>
 </body>
