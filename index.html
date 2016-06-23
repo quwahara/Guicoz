@@ -25,10 +25,6 @@
           }
           gcz.ctrlPersistentStyles = ["left", "top", "width", "height"]
           gcz.preset = {
-            nextCreationPosition: {
-              left: 100,
-              top: 100
-            },
             creationPositionIncrements: {
               left: 10,
               top: 10
@@ -198,7 +194,9 @@
               parentId: bookSpec.id,
               tabTitleId: tabTitle.get(0).id,
               tabContentId: tabContent.get(0).id,
-              nextCreationPosition: (sheetSpec && sheetSpec.nextCreationPosition) || $.extend(true, {}, bookSpec.preference.nextCreationPosition),
+              firstCreatoinPosition: {
+                left: 0, top: 0
+              },
               selected: null,
               ctrls: (sheetSpec && sheetSpec.ctrls) || {}
             }
@@ -254,7 +252,6 @@
           gcz.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
             var preference = gcz.bookSpec().preference
             var sheet = gcz.allElm[sheetSpec.id]
-            var nextCreationPosition = sheetSpec.nextCreationPosition
             ctrlSpec = ctrlSpec || {}
             ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
             ctrlSpec.id = null
@@ -262,10 +259,21 @@
             ctrlSpec.width = ctrlSpec.width || preference.ctrls.ctrl.width
             ctrlSpec.height = ctrlSpec.height || preference.ctrls.ctrl.height
             if(ctrlSpec.left === undefined || ctrlSpec.top === undefined) {
-              ctrlSpec.left = nextCreationPosition.left
-              ctrlSpec.top = nextCreationPosition.top
-              nextCreationPosition.left += gcz.spec.preference.creationPositionIncrements.left
-              nextCreationPosition.top += gcz.spec.preference.creationPositionIncrements.top
+              if(sheetSpec.selected) {
+                var selectedElm = gcz.allElm[sheetSpec.selected].elm
+                var pos = selectedElm.position()
+                var h = selectedElm.height()
+                var h2 = 10 * Math.floor((h + 10) / 10)
+                console.log(h);
+                console.log(h2);
+                console.log(pos.top);
+                ctrlSpec.top = pos.top + h2
+                ctrlSpec.left = pos.left
+              }
+              else {
+                ctrlSpec.top = sheetSpec.firstCreatoinPosition.top
+                ctrlSpec.left = sheetSpec.firstCreatoinPosition.left
+              }
             }
             var $ctrl = $("<div class='ctrl ui-widget-content'></div>")
             .appendTo(sheet.elm)
@@ -273,7 +281,7 @@
             .width(ctrlSpec.width).height(ctrlSpec.height)
             .uniqueId()
             .on("click", function (e) {
-              console.log(this.id);
+              sheetSpec.selected = this.id
             })
             var ctrlId = $ctrl.get(0).id
             sheet.ctrl = { elm: $ctrl }
