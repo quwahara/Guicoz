@@ -188,6 +188,7 @@
             gcz.allElm[sheetId] = book.sheet
             book.elm.tabs("refresh")
             book.elm.tabs({active: $("#" + bookSpec.id).find("li").length - 1})
+            var savedCtrls = (sheetSpec && sheetSpec.ctrls) || {}
             sheetSpec = {
               specOf: "sheet",
               id: sheetId,
@@ -198,12 +199,12 @@
                 left: 0, top: 0
               },
               selected: null,
-              ctrls: (sheetSpec && sheetSpec.ctrls) || {}
+              ctrls: {}
             }
             bookSpec.selected = sheetId
             bookSpec.sheets[sheetId] = sheetSpec
             gcz.allSpec[sheetId] = sheetSpec
-            $.each(sheetSpec.ctrls, function (id, ctrlSpec) {
+            $.each(savedCtrls, function (id, ctrlSpec) {
               gcz(["addCtrl", sheetSpec, ctrlSpec])
             })
             return sheetId;
@@ -252,7 +253,7 @@
           gcz.cmds.addCtrl = function (cmd, sheetSpec, ctrlSpec) {
             var preference = gcz.bookSpec().preference
             var sheet = gcz.allElm[sheetSpec.id]
-            ctrlSpec = ctrlSpec || {}
+            ctrlSpec = $.extend(true, {}, ctrlSpec)
             ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
             ctrlSpec.id = null
             ctrlSpec.parentId = sheetSpec.id
