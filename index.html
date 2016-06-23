@@ -263,7 +263,7 @@
                 var selectedElm = gcz.allElm[sheetSpec.selected].elm
                 var pos = selectedElm.position()
                 var h = selectedElm.height()
-                var h2 = 10 * Math.floor((h + 10) / 10)
+                var h2 = 10 * Math.floor((h - 1 + 10) / 10)
                 ctrlSpec.top = pos.top + h2
                 ctrlSpec.left = pos.left
               }
