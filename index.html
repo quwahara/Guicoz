@@ -143,18 +143,19 @@
             desk.book = { elm: book, tabTitles: book.find("ul"), sheets: {} }
             desk.books[bookId] = desk.book
             gcz.allElm[bookId] = desk.book
+            var savedSheets = (bookSpec && bookSpec.sheets) || {}
             var bookSpec = {
               specOf: "book",
               id: bookId,
               parentId: deskSpec.id,
               preference: $.extend(true, {}, gcz.spec.preference),
               selected: null,
-              sheets: (bookSpec && bookSpec.sheets) || {}
+              sheets: {}
             }
             deskSpec.selected = bookId
             deskSpec.books[bookId] = bookSpec
             gcz.allSpec[bookId] = bookSpec
-            $.each(bookSpec.sheets, function (id, sheetSpec) {
+            $.each(savedSheets, function (id, sheetSpec) {
               gcz(["addSheet", bookSpec, sheetSpec])
             })
           }
@@ -212,8 +213,11 @@
           gcz.cmds.removeAllSheetInBook = function (cmd, bookId) {
             bookId = bookId || (gcz.book().elm.get(0).id)
             var bookSpec = gcz.allSpec[bookId]
-            $.each(bookSpec.sheets, function (sheetId) {
-              gcz(["removeSheet", sheetId])
+            $.map(bookSpec.sheets, function (obj) {
+              return obj.id;
+            })
+            .map(function (id) {
+              gcz(["removeSheet", id])
             })
             bookSpec.selected = null
           }
@@ -310,8 +314,11 @@
           gcz.cmds.removeAllCtrlInSheet = function (cmd, sheetId) {
             sheetId = sheetId || (gcz.sheet().elm.get(0).id)
             var sheetSpec = gcz.allSpec[sheetId]
-            $.each(sheetSpec.ctrls, function (ctrlId) {
-              gcz(["removeCtrl", ctrlId])
+            $.map(sheetSpec.ctrls, function (obj) {
+              return obj.id;
+            })
+            .map(function (id) {
+              gcz(["removeCtrl", id])
             })
             sheetSpec.selected = null
           }
@@ -321,7 +328,6 @@
               delete gcz.allSpec[sheetId].ctrls[ctrlId]
               delete gcz.allSpec[ctrlId]
               $("#" + ctrlId).remove()
-              console.debug("Removed #" + ctrlId + " in sheet #" + sheetId)
             }
           }
           gcz.cmds.download = function (e) {
@@ -335,21 +341,6 @@
           return gcz;
         })()
         GCZ.init()
-        console.log(GCZ.spec);
-        $("#testFlightButton").click(function () {
-          var arg1 = $("#testText").val()
-          GCZ(["removeDesk", arg1])
-          // GCZ(["removeAllBookInDesk", arg1])
-          // GCZ(["removeBook", arg1])
-          // GCZ(["removeAllSheetInBook", arg1])
-          // GCZ(["findSheetHavingCtrl"])
-          // GCZ(["removeSheet"], arg1)
-          // GCZ(["removeAllCtrlInSheet"], arg1)
-          // GCZ(["removeCtrl", arg1])
-          // var res = GCZ(["findParentId", $("#testText").val()])
-          // console.log("# res");
-          // console.log(res);
-        })
         var at = $("body > div")
         $("<button>text</button>").appendTo(at)
         .click(function () {
@@ -389,7 +380,7 @@
             var bookSpec
             try {
               bookSpec = JSON.parse(reader.result)
-              console.debug(bookSpec);
+              // console.debug(bookSpec);
             } catch (e) {
               console.error(e);
             }
@@ -398,12 +389,14 @@
           }
           reader.readAsText(files[0]);
         })
+        $("<div><input id='testText' type='text' /><button>Test Flight</button></div>").appendTo(at)
+        .find("button")
+        .click(function () {
+        })
     });
     </script>
 </head>
 <body>
   <div></div>
-  <input id="testText" type="text" />
-  <button id="testFlightButton">Test Flight</button>
 </body>
 </html>
