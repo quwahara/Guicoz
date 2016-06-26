@@ -73,17 +73,29 @@
             var nt = function (n) {
               return "<tr><td>" + n + "</td><td><input type='text' /></td></tr>";
             }
-            pe.label = $(nt("labe")).appendTo(tbody).find("INPUT")
+            pe.$name = $(nt("name")).appendTo(tbody).find("INPUT")
+            // pe.$label = $(nt("labe")).appendTo(tbody).find("INPUT")
             pe.$value = $(nt("value")).appendTo(tbody).find("INPUT")
-            pe.bgColor = $(nt("bg-color")).appendTo(tbody).find("INPUT")
+            // pe.$bgColor = $(nt("bg-color")).appendTo(tbody).find("INPUT")
             gcz.propEditor = pe
             return gcz;
           }
           gcz.elmToPropEditor = function (id) {
-            if(gcz.allSpec[id].specOf === "ctrl") {
+            var ctrlSpec = gcz.allSpec[id]
+            if(ctrlSpec.specOf === "ctrl") {
               var pe = gcz.propEditor
               if(pe.selected !== id) {
                 pe.selected = id
+                console.log(ctrlSpec.name);
+                // name
+                pe.$name
+                .val(ctrlSpec.name)
+                .off("keyup")
+                .on("keyup", function () {
+                  ctrlSpec.name = this.value
+                })
+                ;
+                // value
                 var $inp = $("#"+id+">INPUT")
                 var inp = $inp.get(0)
                 if(0 <= ["text", "button"].indexOf(inp.getAttribute("type"))) {
@@ -310,17 +322,18 @@
             ctrlSpec = $.extend(true, {}, ctrlSpec)
             ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
             ctrlSpec.id = null
-            ctrlSpec.name = "ctrl" + (function () {
+            ctrlSpec.name = ctrlSpec.name !== undefined ?
+            ctrlSpec.name :
+            ("ctrl" + (function () {
               var counts = sheet.elm.find(".ctrl")
               .map(function(idx, elm) {
                 var m = gcz.allSpec[elm.id].name.match("\\d+$")
                 return m ? parseInt(m[0], 10) : 0;
               })
               .get()
-              console.log(counts);
               counts.push(0)
               return Math.max.apply(null, counts) + 1;
-            })()
+            })());
             ctrlSpec.parentId = sheetSpec.id
             ctrlSpec.width = ctrlSpec.width || preference.ctrls.ctrl.width
             ctrlSpec.height = ctrlSpec.height || preference.ctrls.ctrl.height
@@ -344,7 +357,6 @@
             .width(ctrlSpec.width).height(ctrlSpec.height)
             .uniqueId()
             .on("click", function (e) {
-              console.log(this.id);
               sheetSpec.selected = this.id
               gcz.elmToPropEditor(this.id)
             })
