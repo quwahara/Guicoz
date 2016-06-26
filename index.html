@@ -65,20 +65,42 @@
               })
             })
           }
-          gcz.initPropertyEditor = function functionName() {
-            var propertyEditor = $("<div class='property-editor'></div>")
-            var tab = $("<h2>Property Editor</h2>").appendTo(propertyEditor)
-            var tab = $("<table><thead><tr><td>Name</td><td>Value</td></tr></thead><tbody></tbody></table>").appendTo(propertyEditor)
+          gcz.initPropEditor = function functionName() {
+            var pe = $("<div class='prop-editor'></div>")
+            var tab = $("<h2>Property Editor</h2>").appendTo(pe)
+            var tab = $("<table><thead><tr><td>Name</td><td>Value</td></tr></thead><tbody></tbody></table>").appendTo(pe)
             var tbody = tab.find("tbody")
-            var nv = function (n, v) {
-              return "<tr><td>" + n + "</td><td>" + v + "</td></tr>";
+            var nt = function (n) {
+              return "<tr><td>" + n + "</td><td><input type='text' /></td></tr>";
             }
-            $(nv("labe", "<input type='text' />")).appendTo(tbody)
-            $(nv("value", "<input type='text' />")).appendTo(tbody)
-            $(nv("bg-color", "<input type='text' />")).appendTo(tbody)
-            var tab = $("<button>Apply</button><button>Cancel</button>").appendTo(propertyEditor)
-            gcz.propertyEditor = propertyEditor
+            pe.label = $(nt("labe")).appendTo(tbody).find("INPUT")
+            pe.$value = $(nt("value")).appendTo(tbody).find("INPUT")
+            pe.bgColor = $(nt("bg-color")).appendTo(tbody).find("INPUT")
+            gcz.propEditor = pe
             return gcz;
+          }
+          gcz.elmToPropEditor = function (id) {
+            if(gcz.allSpec[id].specOf === "ctrl") {
+              var pe = gcz.propEditor
+              if(pe.selected !== id) {
+                pe.selected = id
+                var $inp = $("#"+id+">INPUT")
+                var inp = $inp.get(0)
+                if(0 <= ["text", "button"].indexOf(inp.getAttribute("type"))) {
+                  pe.$value.val(inp.value)
+                }
+                pe.$value
+                .off("keyup")
+                .on("keyup", function () {
+                  inp.value = this.value
+                })
+                $inp
+                .off("keyup")
+                .on("keyup", function () {
+                  pe.$value.val(this.value)
+                })
+              }
+            }
           }
           gcz.initRoom = function () {
             gcz.elm = { room: { elm: $("<div class='room'></div>").uniqueId().appendTo("body") } }
@@ -127,7 +149,7 @@
             }
           }
           gcz.init = function () {
-            gcz.initPropertyEditor()
+            gcz.initPropEditor()
             gcz.initRoom()
           }
           gcz.cmds = {}
@@ -288,6 +310,17 @@
             ctrlSpec = $.extend(true, {}, ctrlSpec)
             ctrlSpec.specOf = ctrlSpec.specOf || "ctrl"
             ctrlSpec.id = null
+            ctrlSpec.name = "ctrl" + (function () {
+              var counts = sheet.elm.find(".ctrl")
+              .map(function(idx, elm) {
+                var m = gcz.allSpec[elm.id].name.match("\\d+$")
+                return m ? parseInt(m[0], 10) : 0;
+              })
+              .get()
+              console.log(counts);
+              counts.push(0)
+              return Math.max.apply(null, counts) + 1;
+            })()
             ctrlSpec.parentId = sheetSpec.id
             ctrlSpec.width = ctrlSpec.width || preference.ctrls.ctrl.width
             ctrlSpec.height = ctrlSpec.height || preference.ctrls.ctrl.height
@@ -311,7 +344,9 @@
             .width(ctrlSpec.width).height(ctrlSpec.height)
             .uniqueId()
             .on("click", function (e) {
+              console.log(this.id);
               sheetSpec.selected = this.id
+              gcz.elmToPropEditor(this.id)
             })
             var ctrlId = $ctrl.get(0).id
             sheet.ctrl = { elm: $ctrl }
@@ -323,7 +358,8 @@
             gcz.allSpec[ctrlId] = ctrlSpec
             if(ctrlSpec.input) {
               var $input = $ctrl.html("<input type='" + ctrlSpec.input.type + "'></input>").find("input")
-              ctrlSpec.input.value = ctrlSpec.input.value || ""
+              ctrlSpec.name = ctrlSpec.name.replace("ctrl", ctrlSpec.input.type)
+              ctrlSpec.input.value = ctrlSpec.input.value || ctrlSpec.name
               $input.val(ctrlSpec.input.value)
               gcz.utils.fitInput($ctrl, $input)
             }
@@ -422,7 +458,7 @@
         .click(function () {
         });
         GCZ.init()
-        GCZ.propertyEditor.appendTo(at)
+        GCZ.propEditor.appendTo(at)
     });
     </script>
 </head>
