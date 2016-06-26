@@ -4,12 +4,14 @@
     <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <style>
-    .std-1 { width: 150px; height: 150px; padding: 0.5em; }
-    .page { background-image: url('grid100.png'); height: 1200px; width: 1200px; }
+    /*.std-1 { width: 150px; height: 150px; padding: 0.5em; }*/
+    /*.page { background-image: url('grid100.png'); height: 1200px; width: 1200px; }*/
     body { height: 100%; width: 100%; }
+    h2 { font-size: 15px; }
+    table { font-size: 12px; }
     .ui-tabs { height: 100%; width: 100%; overflow: scroll; }
     .ui-tabs .ui-tabs-panel { overflow: scroll; }
-    .sheet { width: 2000px; height: 2000px; background-image: url('grid100.png'); }
+    .sheet { width: 1000px; height: 2000px; background-image: url('grid100.png'); }
     .sheet { position: relative; }
     .ctrl { position: absolute; }
     .ctrl input { margin: 4px; }
@@ -63,8 +65,22 @@
               })
             })
           }
-          gcz.init = function () {
-
+          gcz.initPropertyEditor = function functionName() {
+            var propertyEditor = $("<div class='property-editor'></div>")
+            var tab = $("<h2>Property Editor</h2>").appendTo(propertyEditor)
+            var tab = $("<table><thead><tr><td>Name</td><td>Value</td></tr></thead><tbody></tbody></table>").appendTo(propertyEditor)
+            var tbody = tab.find("tbody")
+            var nv = function (n, v) {
+              return "<tr><td>" + n + "</td><td>" + v + "</td></tr>";
+            }
+            $(nv("labe", "<input type='text' />")).appendTo(tbody)
+            $(nv("value", "<input type='text' />")).appendTo(tbody)
+            $(nv("bg-color", "<input type='text' />")).appendTo(tbody)
+            var tab = $("<button>Apply</button><button>Cancel</button>").appendTo(propertyEditor)
+            gcz.propertyEditor = propertyEditor
+            return gcz;
+          }
+          gcz.initRoom = function () {
             gcz.elm = { room: { elm: $("<div class='room'></div>").uniqueId().appendTo("body") } }
             gcz.room = function () {
               return gcz.elm.room;
@@ -109,6 +125,10 @@
             gcz.sheet = function () {
               return gcz.allElm[gcz.sheetSpec().id]
             }
+          }
+          gcz.init = function () {
+            gcz.initPropertyEditor()
+            gcz.initRoom()
           }
           gcz.cmds = {}
           gcz.cmds.addDesk = function (cmd, roomSpec) {
@@ -349,7 +369,6 @@
           }
           return gcz;
         })()
-        GCZ.init()
         var at = $("body > div")
         $("<button>text</button>").appendTo(at)
         .click(function () {
@@ -401,7 +420,9 @@
         $("<div><input id='testText' type='text' /><button>Test Flight</button></div>").appendTo(at)
         .find("button")
         .click(function () {
-        })
+        });
+        GCZ.init()
+        GCZ.propertyEditor.appendTo(at)
     });
     </script>
 </head>
