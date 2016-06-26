@@ -50,8 +50,16 @@
           gcz.utils.applyAllElmPosToCtrl = function () {
             $(".ctrl").each(function () {
               var elm = this
+              var $elm = $(elm)
+              var spec = gcz.allSpec[elm.id]
+              var inp = $elm.find("input").get(0)
+              if(inp && inp.tagName === "INPUT"
+              && 0 <= ["text", "button", "checkbox", "radio"].indexOf(inp.getAttribute("type"))
+              ) {
+                spec.input.value = inp.value
+              }
               $.each(gcz.ctrlPersistentStyles, function (index, name) {
-                gcz.allSpec[elm.id][name] = $(elm).css(name)
+                spec[name] = $elm.css(name)
               })
             })
           }
@@ -295,7 +303,8 @@
             gcz.allSpec[ctrlId] = ctrlSpec
             if(ctrlSpec.input) {
               var $input = $ctrl.html("<input type='" + ctrlSpec.input.type + "'></input>").find("input")
-              $input.val(ctrlId)
+              ctrlSpec.input.value = ctrlSpec.input.value || ""
+              $input.val(ctrlSpec.input.value)
               gcz.utils.fitInput($ctrl, $input)
             }
             $ctrl
